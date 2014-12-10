@@ -3,8 +3,8 @@
 #include "math.h"
 
 #define M_PI 3.14159265359
-#define PARAM2 15
-#define PARAM1 15
+#define PARAM2 50
+#define PARAM1 50
 
 Sphere::Sphere()
 {

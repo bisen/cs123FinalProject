@@ -9,6 +9,7 @@
 #include <CS123Common.h>
 
 #include "sphere.h"
+#include "cone.h"
 #include "lib/transforms.h"
 #include "camera.h"
 
@@ -44,6 +45,7 @@ private:
     LabCamera m_camera;
     Transforms m_transform;
     Sphere m_sphere;
+    Cone m_cone;
     float m_fps;
     float m_increment;
     GLuint m_shader;
@@ -56,6 +58,9 @@ private:
     GLfloat m_param_x_3;
     GLfloat m_param_y_3;
     GLfloat m_size_3 = 1.0;
+    GLfloat m_param_x_4;
+    GLfloat m_param_y_4;
+    GLfloat m_size_4 = 1.0;
 
     Cylinder *c;
 

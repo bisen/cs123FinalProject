@@ -11,6 +11,11 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     sphere.cpp \
+    Cylinder.cpp \
+    cone.cpp \
+    plant.cpp \
+    lsys.cpp \
+    Shape.cpp \
     lib/ResourceLoader.cpp \
     lib/transforms.cpp \
     plant.cpp \
