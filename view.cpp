@@ -177,7 +177,6 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
     m_sphere.draw();
 
-<<<<<<< HEAD
     transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
