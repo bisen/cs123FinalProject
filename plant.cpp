@@ -8,7 +8,7 @@ Plant::Plant()
 
     m_system = new LSys();
     char *ab = "ab";
-    Rule *r1 = new StochasticRule('x', "a[-x][+x][~x]", "0", 1.0f);
+    Rule *r1 = new StochasticRule('x', "a[-x][+x][~x]", "0", 0.70f);
     Rule *r2 = new Rule('a', "aa");
 
     m_system->addRule(r1);
@@ -85,28 +85,17 @@ void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation)
         }
     }
 
-    m_cyl->tesselate(50,50,0);
+    m_cyl->tesselate(15,15,0);
     m_cyl->init(vertexLocation, normalLocation);
     m_initialized = 1;
 }
 
 void Plant::render(GLuint shader, Transforms t) {
-//    glm::vec3 ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-//    glm::vec3 diffuse = glm::vec3(0.7f, 0.3f, 0.0f);
-//    glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f);
-
-//    glUniform3fv(glGetAttribLocation(shader, "ambient_color"), 1, &ambient.r);
-//    glUniform3fv(glGetAttribLocation(shader, "diffuse_color"), 1, &diffuse.r);
-//    glUniform3fv(glGetAttribLocation(shader, "specular_color"), 1, &specular.r);
-//    glUniform1f(glGetAttribLocation(shader, "shininess"), 10);
 
     Transforms planttrans = t;
 
 
     int s = m_scenegraph->size();
-
-    glm::vec3 initialpos = glm::vec3(0.0f, -0.8f, 0.0f);
-    glm::vec3 p1, p2;
 
     for(int i = 0; i < s; i++) {
         Node n = m_scenegraph->at(i);

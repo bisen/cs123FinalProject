@@ -12,18 +12,30 @@ SOURCES += main.cpp \
     view.cpp \
     sphere.cpp \
     lib/ResourceLoader.cpp \
-    lib/transforms.cpp
+    lib/transforms.cpp \
+    plant.cpp \
+    lsys.cpp \
+    cylinder.cpp \
+    shape.cpp \
+    ivy.cpp
 
 
 HEADERS += mainwindow.h \
     view.h \
-    lib/ResourceLoader.h
+    lib/ResourceLoader.h \
+    plant.h \
+    lsys.h \
+    cylinder.h \
+    shape.h \
+    ivy.h
 
 FORMS += mainwindow.ui
 
 OTHER_FILES += \
     shaders/shader.frag \
-    shaders/shader.vert
+    shaders/shader.vert \
+    shaders/plant.vert \
+    shaders/plant.frag
 
 RESOURCES += \
     shaders/shaders.qrc
