@@ -22,10 +22,16 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    m_theta = 0.0f;
+    m_phi = M_PI / 2.0f;
+
+    m_plant = new Plant();
 }
 
 View::~View()
 {
+    delete m_plant;
 }
 
 void View::initializeGL()
@@ -74,7 +80,7 @@ void View::initializeGL()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Set the screen color when the color buffer is cleared (in RGBA format)
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Load the initial settings
     updateCamera();
@@ -85,6 +91,8 @@ void View::initializeGL()
     // events. This occurs if there are two monitors and the mouse is on the
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+
+    m_plant->parseSystem(7, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
 }
 
 void View::paintGL()
@@ -138,6 +146,15 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
     m_sphere.draw();
+
+//    Transforms cylindertrans = m_transform;
+//    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
+
+//    glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 1, 0);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
+
+//    m_plant->render(m_shader, cylindertrans);
+
 
     glUseProgram(0);
 
@@ -205,6 +222,22 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
     // TODO: Handle keyboard presses here
+    switch(event->key()) {
+    case Qt::Key_Up:
+        m_phi += -M_PI / 24;
+        break;
+    case Qt::Key_Down:
+        m_phi += M_PI / 24;
+        break;
+    case Qt::Key_Left:
+        m_theta += -M_PI / 24;
+        break;
+    case Qt::Key_Right:
+        m_theta += M_PI / 24;
+        break;
+    }
+
+    m_camera.eye = 5.0f * glm::vec3(glm::cos(m_theta) * glm::sin(m_phi), glm::cos(m_phi), glm::sin(m_theta) * glm::sin(m_phi));
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)

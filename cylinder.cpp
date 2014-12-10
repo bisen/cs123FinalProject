@@ -67,7 +67,7 @@ void Cylinder::tesselate(int one, int two, float three) {
         float r = (1.0f - ((float)i/(float)m_p2)) / 2.0f;
         for(j = m_p1; j >= 0; j--){
             float theta = ((float)j/m_p1) * (2 * M_PI);
-            m_positions[0][(i * (m_p1+1)) + j] = glm::vec3(r * glm::cos(theta), R, r * glm::sin(theta));
+            m_positions[0][(i * (m_p1+1)) + j] = glm::vec3(r * glm::cos(theta), 2 * R, r * glm::sin(theta));
             m_normals[0][(i * (m_p1+1)) + j] = glm::vec3(0.0f, 1.0f, 0.0f);
         }
     }
@@ -79,11 +79,11 @@ void Cylinder::tesselate(int one, int two, float three) {
         for(j = m_p1; j >= 0; j--) {
             float theta = ((float)j/(float)m_p1) * (2 * M_PI);
             if(j == m_p1) {
-                m_positions[1][(i * (m_p1+1)) + j] = getVertex(0.0f, y);
+                m_positions[1][(i * (m_p1+1)) + j] = getVertex(0.0f, y + R);
             } else {
-                m_positions[1][(i * (m_p1+1)) + j] = getVertex(theta, y);
+                m_positions[1][(i * (m_p1+1)) + j] = getVertex(theta, y + R);
             }
-            m_normals[1][(i * (m_p1+1)) + j] = getVertex(theta, y);
+            m_normals[1][(i * (m_p1+1)) + j] = getVertex(theta, y + R);
             m_normals[1][(i * (m_p1+1)) + j].y = 0.0f;
         }
     }
@@ -94,7 +94,7 @@ void Cylinder::tesselate(int one, int two, float three) {
         float r = ((float)i/(float)m_p2) / 2.0f;
         for(j = m_p1; j >= 0; j--){
             float theta = ((float)j/m_p1) * (2 * M_PI);
-            m_positions[2][(i * (m_p1+1)) + j] = glm::vec3(r * glm::cos(theta), -R, r * glm::sin(theta));
+            m_positions[2][(i * (m_p1+1)) + j] = glm::vec3(r * glm::cos(theta), 0.0f, r * glm::sin(theta));
             m_normals[2][(i * (m_p1+1)) + j] = glm::vec3(0.0f, -1.0f, 0.0f);
         }
     }

@@ -1,5 +1,9 @@
 #include "lsys.h"
 
+Rule::Rule() {
+
+}
+
 Rule::Rule(char in, char *out) {
     this->in = in;
     this->out = new char[strlen(out)];
@@ -17,6 +21,35 @@ void Rule::apply(char input, char **result, bool &happened) {
         memcpy(*result, out, length * sizeof(char));
         *result += length;
         happened = true;
+    }
+}
+
+StochasticRule::StochasticRule(char in, char *out, char *alt, float p) {
+    this->in = in;
+    this->out = new char[strlen(out)];
+    this->alt = new char[strlen(alt)];
+
+    this->length = strlen(out);
+    this->altlength = strlen(alt);
+
+    memcpy(this->out, out, length * sizeof(char));
+    memcpy(this->alt, alt, altlength * sizeof(char));
+
+    this->p = p;
+}
+
+void StochasticRule::apply(char input, char **result, bool &happened) {
+    if(input == in) {
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        if(r <= p){
+            memcpy(*result, out, length * sizeof(char));
+            *result += length;
+            happened = true;
+        } else {
+            memcpy(*result, alt, altlength * sizeof(char));
+            *result += altlength;
+            happened = true;
+        }
     }
 }
 

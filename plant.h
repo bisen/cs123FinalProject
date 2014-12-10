@@ -7,14 +7,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "lsys.h"
 #include <CS123Common.h>
+#include "transforms.h"
 
 
 typedef struct node {
     glm::mat4 model;
     glm::vec4 up;
 
-    glm::mat3 rotation;
-    glm::vec3 translation;
+    glm::vec3 color;
 } Node;
 
 class Plant
@@ -23,7 +23,7 @@ public:
     Plant();
     virtual ~Plant();
 
-    void render(GLuint shader);
+    void render(GLuint shader, Transforms t);
 
 //    void gen(int n);
     virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
@@ -31,8 +31,6 @@ public:
     static void printVertex(glm::vec4 v) { printf("%f, %f, %f\n", v.x, v.y, v.z); }
 
     float m_factor;
-
-    void draw();
 
 private:
 

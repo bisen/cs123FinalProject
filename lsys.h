@@ -11,6 +11,7 @@
 class Rule
 {
 public:
+    Rule();
     Rule(char in, char *out);
     virtual ~Rule();
 
@@ -19,8 +20,19 @@ public:
     int length;
 
     //Modify result to contain output of rule if input matches input condition
-    void apply(char input, char **result, bool &happened);
+    virtual void apply(char input, char **result, bool &happened);
 
+};
+
+class StochasticRule : public Rule
+{
+public:
+    StochasticRule(char in, char *out, char *alt, float p);
+    char *alt;
+    int altlength;
+    float p;
+
+    virtual void apply(char input, char **result, bool &happened);
 };
 
 //Generates Lindenmayer systems given a number of rules
