@@ -15,7 +15,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
 
     // Set up the camera
-    m_camera.eye.x = 0.0f, m_camera.eye.y = 0.0f, m_camera.eye.z = 5.0f;
+    m_camera.eye.x = 0.0f, m_camera.eye.y = 0.0f, m_camera.eye.z = 0.0f;
     m_camera.center.x = 0.0f, m_camera.center.y = 0.0f, m_camera.center.z = 0.0f;
     m_camera.up.x = 0.0f, m_camera.up.y = 1.0f, m_camera.up.z = 0.0f;
     m_camera.fovy = 45.0f, m_camera.near = 0.1f, m_camera.far = 1000.0f;
@@ -99,15 +99,15 @@ void View::initializeGL()
 void View::paintGL()
 {
     // Get the time in seconds
-    float time = m_increment++ / (float) 60;
+    m_pos_y += (m_dir_y / (float) 60);
 
     // Clear the color and depth buffers to the current glClearColor
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float d1 = 2-fmod(time,4);
-    float d2 = 2-fmod(time+1,4);
-    float d3 = 2-fmod(time+2,4);
-    float d4 = 2-fmod(time+3,4);
+    float d1 = (m_pos_y<0?-1:1)*2-fmod(m_pos_y,4);
+    float d2 = (m_pos_y+1<0?-1:1)*2-fmod(m_pos_y+1,4);
+    float d3 = (m_pos_y+2<0?-1:1)*2-fmod(m_pos_y+2,4);
+    float d4 = (m_pos_y+3<0?-1:1)*2-fmod(m_pos_y+3,4);
 
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
@@ -229,8 +229,8 @@ void View::paintGL()
 
     // TODO: 7.2 Animate the camera:
 
-    m_camera.eye[0] = 1.4*sin(2*time/M_PI);
-    m_camera.eye[2] = 1.4*cos(2*time/M_PI);
+    m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
+    m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
     if (d1 < -1.9 || d1 >1.9) {
         m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
@@ -254,10 +254,14 @@ void View::paintGL()
         m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
-    m_camera.eye[1] = 0;
-    m_camera.center[0] = -sin(2*time/M_PI);
-    m_camera.center[2] = -cos(2*time/M_PI);
-    m_camera.center[1] = 0;
+
+    m_theta+=(m_dir_theta/(float) 60);
+    m_camera.eye.y = 0;
+    m_camera.eye.x = 1.5*sin(2*m_theta/M_PI);
+    m_camera.eye.z = 1.5*cos(2*m_theta/M_PI);
+    m_camera.center.x = -sin(2*m_theta/M_PI);
+    m_camera.center.z = -cos(2*m_theta/M_PI);
+    m_camera.center.y = 0;
     updateCamera();
 }
 
@@ -284,7 +288,8 @@ void View::mouseMoveEvent(QMouseEvent *event)
     int deltaY = event->y() - height() / 2;
     if (!deltaX && !deltaY) return;
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
-
+    m_dir_theta=max(min(m_dir_theta+((float) deltaX/80.0),4.0),-4.0);
+    m_dir_y=max(min(m_dir_y-((float) deltaY/80.0),4.0),-4.0);
     // TODO: Handle mouse movements here
 }
 
@@ -299,20 +304,24 @@ void View::keyPressEvent(QKeyEvent *event)
     // TODO: Handle keyboard presses here
     switch(event->key()) {
     case Qt::Key_Up:
-        m_phi += -M_PI / 24;
+        //m_phi += -M_PI / 24;
+        m_dir_y++;
         break;
     case Qt::Key_Down:
-        m_phi += M_PI / 24;
+        //m_phi += M_PI / 24;
+        m_dir_y--;
         break;
     case Qt::Key_Left:
-        m_theta += -M_PI / 24;
+        //m_theta += -M_PI / 24;
+        m_dir_theta--;
         break;
     case Qt::Key_Right:
-        m_theta += M_PI / 24;
+        //m_theta += M_PI / 24;
+        m_dir_theta++;
         break;
     }
 
-    m_camera.eye = 5.0f * glm::vec3(glm::cos(m_theta) * glm::sin(m_phi), glm::cos(m_phi), glm::sin(m_theta) * glm::sin(m_phi));
+    //m_camera.eye = 5.0f * glm::vec3(glm::cos(m_theta) * glm::sin(m_phi), glm::cos(m_phi), glm::sin(m_theta) * glm::sin(m_phi));
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)

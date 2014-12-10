@@ -27,6 +27,7 @@ void Sphere::init(const GLuint vertexLocation, const GLuint normalLocation){
 
     for (int i = 0; i<PARAM2+1; i++){
 
+
         GLfloat a1[] = {0.5*cos(i*2*M_PI/(PARAM2))/PARAM1, 0.5*sin(i*2*M_PI/(PARAM2))/PARAM1, 0.5, 0, 0, 1};
         GLfloat a2[] = {0.5*cos(-i*2*M_PI/(PARAM2))/PARAM1, 0.5*sin(-i*2*M_PI/(PARAM2))/PARAM1, -0.5, 0, 0, -1};
         std::copy(a1, a1 + 6, vertexData + 6+i*6);

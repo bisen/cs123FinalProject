@@ -60,6 +60,9 @@ private:
     GLfloat m_param_x_4;
     GLfloat m_param_y_4;
     GLfloat m_size_4 = 1.0;
+    GLfloat m_dir_theta = -1.0;
+    GLfloat m_dir_y = 1.0;
+    GLfloat m_pos_y;
 
     Cylinder *c;
 
