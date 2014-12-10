@@ -51,7 +51,7 @@ void main(){
         float theta = u * 2 * M_PI;
 
         float newx = radius * cos(theta);
-        float newz = radius * sin(theta);
+        float newz = (radius-position_worldSpace.z) * sin(theta);
 
         vec4 cyl_position = vec4(newx, position_worldSpace.y, newz, 1.0);
 
