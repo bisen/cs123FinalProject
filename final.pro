@@ -11,6 +11,7 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     sphere.cpp \
+    cone.cpp \
     lib/ResourceLoader.cpp \
     lib/transforms.cpp
 
