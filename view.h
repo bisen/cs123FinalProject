@@ -1,0 +1,60 @@
+#ifndef VIEW_H
+#define VIEW_H
+
+#include <QTime>
+#include <QTimer>
+#include "GL/glew.h"
+#include <qgl.h>
+#include <QGLWidget>
+#include <CS123Common.h>
+
+#include "sphere.h"
+#include "lib/transforms.h"
+#include "camera.h"
+
+class View : public QGLWidget
+{
+    Q_OBJECT
+
+public:
+    View(QWidget *parent);
+    ~View();
+
+private:
+    QTime time;
+    QTimer timer;
+
+    void initializeGL();
+    void paintGL();
+    void resizeGL(int w, int h);
+
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+    void updateCamera();
+
+    LabCamera m_camera;
+    Transforms m_transform;
+    Sphere m_sphere;
+    float m_fps;
+    float m_increment;
+    GLuint m_shader;
+    GLfloat m_param_x_1;
+    GLfloat m_param_y_1;
+    GLfloat m_size_1 = 1.0;
+    GLfloat m_param_x_2;
+    GLfloat m_param_y_2;
+    GLfloat m_size_2 = 1.0;
+    GLfloat m_param_x_3;
+    GLfloat m_param_y_3;
+    GLfloat m_size_3 = 1.0;
+
+private slots:
+    void tick();
+};
+
+#endif // VIEW_H
+
