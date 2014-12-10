@@ -16,6 +16,7 @@
 #include "plant.h"
 #include "shape.h"
 #include "cylinder.h"
+#include "ivy.h"
 
 class View : public QGLWidget
 {
@@ -67,6 +68,8 @@ private:
     Cylinder *c;
 
     Plant *m_plant;
+
+    GLuint m_plantshader;
 
     float m_theta, m_phi;
 

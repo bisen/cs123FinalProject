@@ -32,7 +32,7 @@ public:
 
     float m_factor;
 
-private:
+protected:
 
     LSys *m_system;
     char *m_initial;
@@ -41,12 +41,6 @@ private:
     QList<Node> *m_scenegraph;
 
     Cylinder *m_cyl;
-
-    GLfloat *m_buf;
-
-    GLuint m_vbo;
-    GLuint m_vao;
-
 };
 
 #endif // PLANT_H

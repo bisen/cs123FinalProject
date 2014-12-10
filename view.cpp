@@ -26,7 +26,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_theta = 0.0f;
     m_phi = M_PI / 2.0f;
 
-    m_plant = new Plant();
+    m_plant = new Ivy();
 }
 
 View::~View()
@@ -59,6 +59,8 @@ void View::initializeGL()
     m_sphere.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
     m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
 
+    m_plantshader = ResourceLoader::loadShaders("shaders/plant.vert", "shaders/plant.frag");
+
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
     glEnable(GL_DEPTH_TEST);
@@ -81,7 +83,7 @@ void View::initializeGL()
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // Set the screen color when the color buffer is cleared (in RGBA format)
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Load the initial settings
     updateCamera();
@@ -93,7 +95,7 @@ void View::initializeGL()
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-    m_plant->parseSystem(7, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
+    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
 }
 
 void View::paintGL()
@@ -115,6 +117,29 @@ void View::paintGL()
     glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.2, 0.2, 0.2);
     glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
+
+    glUseProgram(0);
+
+    glUseProgram(m_plantshader);
+    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
+    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 1, 0, 0);
+    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
+    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
+    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
+    Transforms cylindertrans = m_transform;
+    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
+
+    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
+
+    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
+    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
+
+    m_plant->render(m_shader, cylindertrans);
+
+
+    glUseProgram(0);
+
+    glUseProgram(m_shader);
 
     // TODO: Put your drawing code here
     Transforms transform1 = m_transform;
@@ -216,16 +241,6 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
     m_cone.draw();
 
-//    Transforms cylindertrans = m_transform;
-//    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
-
-//    glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 1, 0);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
-
-//    m_plant->render(m_shader, cylindertrans);
-
-
-    glUseProgram(0);
 
     // TODO: 7.2 Animate the camera:
 
