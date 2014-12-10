@@ -13,6 +13,10 @@
 #include "lib/transforms.h"
 #include "camera.h"
 
+#include "plant.h"
+#include "shape.h"
+#include "cylinder.h"
+
 class View : public QGLWidget
 {
     Q_OBJECT
@@ -56,6 +60,12 @@ private:
     GLfloat m_param_x_4;
     GLfloat m_param_y_4;
     GLfloat m_size_4 = 1.0;
+
+    Cylinder *c;
+
+    Plant *m_plant;
+
+    float m_theta, m_phi;
 
 private slots:
     void tick();
