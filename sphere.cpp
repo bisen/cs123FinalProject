@@ -6,13 +6,17 @@
 #define PARAM2 50
 #define PARAM1 50
 
+#define LEVEL 16
+
 Sphere::Sphere()
 {
     m_isInitialized = false;
+    m_ivy = new Ivy();
 }
 
 Sphere::Sphere(const GLuint vertexLocation, const GLuint normalLocation){
     init(vertexLocation, normalLocation);
+    m_ivy = new Ivy();
 }
 
 void Sphere::init(const GLuint vertexLocation, const GLuint normalLocation){
@@ -138,6 +142,8 @@ void Sphere::init(const GLuint vertexLocation, const GLuint normalLocation){
     //Clean up -- unbind things
     glBindBuffer(GL_ARRAY_BUFFER,0);
     glBindVertexArray(0);
+
+    m_ivy->parseSystem(LEVEL, vertexLocation, normalLocation);
 }
 
 void Sphere::draw(){
@@ -151,4 +157,17 @@ void Sphere::draw(){
         glDrawArrays(GL_TRIANGLES, 2*(PARAM2+2), 6*(3*PARAM1-2)*PARAM2 /* Number of vertices to draw */);
         glBindVertexArray(0);
     }
+}
+
+void Sphere::drawIvy(GLuint shader, Transforms t) {
+    glUniform1i(glGetUniformLocation(shader, "wrap"), 1);
+    glUniform3f(glGetUniformLocation(shader, "center"), 0, 0, 0);
+    glUniform1f(glGetUniformLocation(shader, "radius"), 0.5f);
+
+    t.model = glm::scale(t.model, glm::vec3(0.1f, 0.1f, 0.1f));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &t.view[0][0]);
+    m_ivy->render(shader, t);
+
+    glUniform1i(glGetUniformLocation(shader, "wrap"), 0);
+
 }

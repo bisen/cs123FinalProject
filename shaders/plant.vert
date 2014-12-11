@@ -25,15 +25,29 @@ uniform vec3 lightPosition_worldSpace;
 */
 
 void main(){
-        position_worldSpace = (m * vec4(position, 1.0)).xyz;
-        position_cameraSpace = (v * m * vec4(position, 1.0)).xyz;
 
-        vec3 vertexPosition_cameraSpace = (v*m * vec4(position,1)).xyz;
+        vec3 old_position_worldSpace = (m * vec4(position, 1.0)).xyz;
+
+        float circumference = 2 * M_PI * radius;
+
+        float u = old_position_worldSpace.x / circumference;
+        float theta = u * 2 * M_PI;
+
+        float newx = radius * cos(theta);
+        float newz = (radius-old_position_worldSpace.z) * sin(theta);
+
+        vec4 cyl_position = vec4(newx, old_position_worldSpace.y, newz, 1.0);
+
+        position_worldSpace = old_position_worldSpace;
+        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
+        position_cameraSpace = (v * m * vec4(new_position, 1.0)).xyz;
+
+        vec3 vertexPosition_cameraSpace = (v*m * vec4(new_position,1)).xyz;
         eyeDirection_cameraSpace = vec3(0,0,0) - vertexPosition_cameraSpace;
 
         lightPosition_cameraSpace = (v * vec4(lightPosition_worldSpace, 1)).xyz;
 
-        flat_normal_cameraSpace = normal_cameraSpace = ( inverse(transpose(v * m)) * vec4(normalize(normal), 0)).xyz;
+        flat_normal_cameraSpace = normal_cameraSpace = -( inverse(transpose(v * m)) * vec4(normalize(normal), 0)).xyz;
 
         /*
           (0, max)
@@ -44,16 +58,6 @@ void main(){
           *------>
           (0,0)    (max,0)
         */
-
-        float circumference = 2 * M_PI * radius;
-
-        float u = position_worldSpace.x / circumference;
-        float theta = u * 2 * M_PI;
-
-        float newx = radius * cos(theta);
-        float newz = (radius-position_worldSpace.z) * sin(theta);
-
-        vec4 cyl_position = vec4(newx, position_worldSpace.y, newz, 1.0);
 
         gl_Position =  mvp*inverse(m)*cyl_position;
 }

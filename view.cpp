@@ -158,7 +158,9 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
+    glUniform3fv(glGetUniformLocation(m_shader, "center"), 1, glm::value_ptr(glm::vec3(m_param_x_1, m_param_y_1, d1)));
     m_sphere.draw();
+    m_sphere.drawIvy(m_shader, transform1);
 
     transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);

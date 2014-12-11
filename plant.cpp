@@ -100,7 +100,7 @@ void Plant::render(GLuint shader, Transforms t) {
     for(int i = 0; i < s; i++) {
         Node n = m_scenegraph->at(i);
 
-        planttrans.model = t.model * n.model;
+        planttrans.model = t.model * glm::rotate(glm::mat4(1.0f), (float)M_PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)) * n.model;
 
         glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &planttrans.getTransform()[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &planttrans.model[0][0]);
