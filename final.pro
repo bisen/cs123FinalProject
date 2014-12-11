@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     lsys.cpp \
     cylinder.cpp \
     shape.cpp \
-    ivy.cpp
+    ivy.cpp \
+    skybox.cpp
 
 
 HEADERS += mainwindow.h \
@@ -28,7 +29,8 @@ HEADERS += mainwindow.h \
     lsys.h \
     cylinder.h \
     shape.h \
-    ivy.h
+    ivy.h \
+    skybox.h
 
 FORMS += mainwindow.ui
 
@@ -36,7 +38,15 @@ OTHER_FILES += \
     shaders/shader.frag \
     shaders/shader.vert \
     shaders/plant.vert \
-    shaders/plant.frag
+    shaders/plant.frag \
+    shaders/skybox.vert \
+    shaders/skybox.frag \
+    assets/PosZ.png \
+    assets/PosY.png \
+    assets/PosX.png \
+    assets/NegZ.png \
+    assets/NegY.png \
+    assets/NegX.png
 
 RESOURCES += \
     shaders/shaders.qrc
