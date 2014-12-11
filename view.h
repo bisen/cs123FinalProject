@@ -9,7 +9,6 @@
 #include <CS123Common.h>
 
 #include "skybox.h"
-#include "sphere.h"
 #include "cone.h"
 #include "lib/transforms.h"
 #include "camera.h"
@@ -49,7 +48,7 @@ private:
     LabCamera m_camera;
     Transforms m_transform;
 
-    Sphere m_sphere;
+    Cylinder m_cylinder;
     Cone m_cone;
     float m_fps;
     float m_increment;

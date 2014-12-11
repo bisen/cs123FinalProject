@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-View::View(QWidget *parent) : QGLWidget(parent)
+View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0))
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -18,7 +18,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera.eye.x = 0.0f, m_camera.eye.y = 0.0f, m_camera.eye.z = 0.0f;
     m_camera.center.x = 0.0f, m_camera.center.y = 0.0f, m_camera.center.z = 0.0f;
     m_camera.up.x = 0.0f, m_camera.up.y = 1.0f, m_camera.up.z = 0.0f;
-    m_camera.fovy = 45.0f, m_camera.near = 0.1f, m_camera.far = 1000.0f;
+    m_camera.fovy = 70.0f, m_camera.near = 0.1f, m_camera.far = 1000.0f;
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -27,6 +27,22 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_phi = M_PI / 2.0f;
 
     m_plant = new Ivy();
+
+    m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
 }
 
 View::~View()
@@ -60,7 +76,8 @@ void View::initializeGL()
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
     m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
-    m_sphere.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
+    m_cylinder.tesselate(50,50,0);
+    m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
     m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
 
 
@@ -149,18 +166,18 @@ void View::paintGL()
 
     glUseProgram(m_shader);
 
-    // TODO: Put your drawing code here
+    ///////////layer 1
     Transforms transform1 = m_transform;
-    transform1.model=glm::rotate(transform1.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform1.model=glm::translate(transform1.model, glm::vec3(m_param_x_1, m_param_y_1, d1));
-    transform1.model=glm::scale(transform1.model, glm::vec3(m_size_1, m_size_1, 1.0));
+    transform1.model=glm::translate(transform1.model, glm::vec3(m_param_x_1, d1, m_param_y_1));
+    transform1.model=glm::scale(transform1.model, glm::vec3(m_size_1, 1.0, m_size_1));
     glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
-    m_sphere.draw();
+    m_cylinder.draw();
 
-    transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, 1));
+    transform1.model=glm::rotate(transform1.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
+    transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, 1.5));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
@@ -174,18 +191,34 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
     m_cone.draw();
 
+//    Transforms transformT = m_transform;
+//    transformT.model=glm::translate(transformT.model, glm::vec3(m_param_x_1+0.5*m_size_1, m_param_y_1, d1-0.4));
+//    transformT.model=glm::scale(transformT.model, glm::vec3(0.3, 0.3, 0.1));
+//    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
+//    m_sphere.draw();
+
+//    transformT.model=glm::scale(transformT.model, glm::vec3(1.1, 1.1, 5));
+//    transformT.model=glm::translate(transformT.model, glm::vec3(0, 0, 0.6));
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
+//    m_cone.draw();
+
+    //////layer 2
     Transforms transform2 = m_transform;
-    transform2.model=glm::rotate(transform2.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform2.model=glm::translate(transform2.model, glm::vec3(m_param_x_2, m_param_y_2, d2));
-    transform2.model=glm::scale(transform2.model, glm::vec3(m_size_2, m_size_2, 1.0));
-    glUseProgram(m_shader);
+    transform2.model=glm::translate(transform2.model, glm::vec3(m_param_x_2, d2, m_param_y_2));
+    transform2.model=glm::scale(transform2.model, glm::vec3(m_size_2, 1.0, m_size_2));
     glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 1, 0);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
-    m_sphere.draw();
+    m_cylinder.draw();
 
-    transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, 1));
+    transform2.model=glm::rotate(transform2.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
+    transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, 1.5));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
@@ -199,18 +232,18 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
     m_cone.draw();
 
+//    /////////layer 3
     Transforms transform3 = m_transform;
-    transform3.model=glm::rotate(transform3.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform3.model=glm::translate(transform3.model, glm::vec3(m_param_x_3, m_param_y_3, d3));
-    transform3.model=glm::scale(transform3.model, glm::vec3(m_size_3, m_size_3, 1.0));
-    glUseProgram(m_shader);
+    transform3.model=glm::translate(transform3.model, glm::vec3(m_param_x_3, d3, m_param_y_3));
+    transform3.model=glm::scale(transform3.model, glm::vec3(m_size_3, 1.0, m_size_3));
     glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 0, 1);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
-    m_sphere.draw();
+    m_cylinder.draw();
 
-    transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, 1));
+    transform3.model=glm::rotate(transform3.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
+    transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, 1.5));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
@@ -224,18 +257,18 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
     m_cone.draw();
 
+//    //////layer 4
     Transforms transform4 = m_transform;
-    transform4.model=glm::rotate(transform4.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform4.model=glm::translate(transform4.model, glm::vec3(m_param_x_4, m_param_y_4, d4));
-    transform4.model=glm::scale(transform4.model, glm::vec3(m_size_4, m_size_4, 1.0));
-    glUseProgram(m_shader);
+    transform4.model=glm::translate(transform4.model, glm::vec3(m_param_x_4, d4, m_param_y_4));
+    transform4.model=glm::scale(transform4.model, glm::vec3(m_size_4, 1.0, m_size_4));
     glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 1);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
-    m_sphere.draw();
+    m_cylinder.draw();
 
-    transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, 1));
+    transform4.model=glm::rotate(transform4.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
+    transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, 1.5));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
@@ -254,25 +287,25 @@ void View::paintGL()
 
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
-    if (d1 < -1.9 || d1 >1.9) {
+    if (d1 >1.9) {
         m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d2 < -1.9 || d2 >1.9) {
+    if (d2 >1.9) {
         m_param_x_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d3 < -1.9 || d3 >1.9) {
+    if (d3 >1.9) {
         m_param_x_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d4 < -1.9 || d4 >1.9) {
+    if (d4 >1.9) {
         m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
