@@ -8,6 +8,7 @@
 #include <QGLWidget>
 #include <CS123Common.h>
 
+#include "skybox.h"
 #include "sphere.h"
 #include "cone.h"
 #include "lib/transforms.h"
@@ -42,8 +43,12 @@ private:
     void keyReleaseEvent(QKeyEvent *event);
     void updateCamera();
 
+    GLuint m_skyboxShader;
+    Skybox m_skybox;
+
     LabCamera m_camera;
     Transforms m_transform;
+
     Sphere m_sphere;
     Cone m_cone;
     float m_fps;

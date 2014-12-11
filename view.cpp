@@ -55,11 +55,13 @@ void View::initializeGL()
     }
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
+    m_skyboxShader = ResourceLoader::loadShaders(":/shaders/skybox.vert", ":/shaders/skybox.frag");
+    m_plantshader = ResourceLoader::loadShaders(":/shaders/plant.vert", ":/shaders/plant.frag");
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+
+    m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_sphere.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
     m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
-
-    m_plantshader = ResourceLoader::loadShaders("shaders/plant.vert", "shaders/plant.frag");
 
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
@@ -92,7 +94,7 @@ void View::initializeGL()
     // This needs to be done here because the mouse may be initially outside
     // the fullscreen window and will not automatically receive mouse move
     // events. This occurs if there are two monitors and the mouse is on the
-    // secondary monitor.
+    // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
@@ -105,6 +107,12 @@ void View::paintGL()
 
     // Clear the color and depth buffers to the current glClearColor
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //draw skybox
+    glUseProgram(m_skyboxShader);
+    glUniformMatrix4fv(glGetUniformLocation(m_skyboxShader, "v"), 1, GL_FALSE, &m_transform.getTransform()[0][0]);
+    m_skybox.draw();
+    glUseProgram(0);
 
     float d1 = (m_pos_y<0?-1:1)*2-fmod(m_pos_y,4);
     float d2 = (m_pos_y+1<0?-1:1)*2-fmod(m_pos_y+1,4);
