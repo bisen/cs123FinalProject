@@ -304,8 +304,7 @@ void View::mouseMoveEvent(QMouseEvent *event)
     if (!deltaX && !deltaY) return;
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
     m_dir_theta=max(min(m_dir_theta+((float) deltaX/80.0),4.0),-4.0);
-    m_dir_y=max(min(m_dir_y-((float) deltaY/80.0),4.0),-4.0);
-    // TODO: Handle mouse movements here
+    m_dir_y=max(min(m_dir_y-((float) deltaY/240.0),1.8),-1.8);
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
