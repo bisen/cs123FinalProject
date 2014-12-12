@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)), m_level(Level(&m_cylinder, &m_cone))
+View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m_cone(Cone(50,50,0)), m_level(Level(&m_cylinder, &m_cone))
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -26,7 +26,7 @@ View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)), 
     m_theta = 0.0f;
     m_phi = M_PI / 2.0f;
 
-    m_plant = new Ivy();
+//    m_plant = new Ivy();
 
     m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
@@ -47,7 +47,7 @@ View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)), 
 
 View::~View()
 {
-    delete m_plant;
+//    delete m_plant;
 }
 
 void View::initializeGL()
@@ -78,6 +78,7 @@ void View::initializeGL()
     m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
     m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
+    m_cone.tesselate(50,50,0);
     m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
 
 
@@ -114,7 +115,7 @@ void View::initializeGL()
     // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
+//    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
 }
 
 void View::paintGL()
@@ -144,23 +145,23 @@ void View::paintGL()
 
     glUseProgram(0);
 
-    glUseProgram(m_plantshader);
-    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
-    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
-    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
-    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
-    Transforms cylindertrans = m_transform;
-    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
+//    glUseProgram(m_plantshader);
+//    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
+//    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
+//    Transforms cylindertrans = m_transform;
+//    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
-    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
+//    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
 
-    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
-    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
+//    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
 
-    m_plant->render(m_shader, cylindertrans);
+//    m_plant->render(m_plantshader, cylindertrans);
 
 
-    glUseProgram(0);
+//    glUseProgram(0);
 
     glUseProgram(m_shader);
 

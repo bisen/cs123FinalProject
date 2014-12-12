@@ -107,7 +107,7 @@ void Skybox::init(const GLuint vertexLocation,
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
     // Give our vertices to OpenGL.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*36, &vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*36, &vertexData, GL_STATIC_DRAW);
 
     // Expose vertices to shader
     glEnableVertexAttribArray(vertexLocation);

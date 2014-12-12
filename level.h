@@ -10,6 +10,7 @@ class Level
 {
 public:
     Level(Cylinder *cylinder, Cone *cone);
+    virtual ~Level();
     void draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLfloat size, Transforms transform);
     void drawIvy(GLuint shader, Transforms t);
 private:

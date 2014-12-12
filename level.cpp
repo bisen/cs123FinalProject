@@ -4,6 +4,11 @@ Level::Level(Cylinder *cylinder, Cone *cone)
 {
     m_cylinder = cylinder;
     m_cone = cone;
+    m_ivy = new Ivy();
+}
+
+Level::~Level(){
+    delete m_ivy;
 }
 
 void Level::draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLfloat size, Transforms transform)
@@ -15,18 +20,17 @@ void Level::draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLf
     glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &transform.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &transform.view[0][0]);
     m_cylinder->draw();
-    //drawIvy(shader, transform);
+    drawIvy(shader, transform);
 
-    transform.model=glm::rotate(transform.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform.model=glm::translate(transform.model, glm::vec3(0, 0, 1.5));
+    transform.model=glm::translate(transform.model, glm::vec3(0, 1.5, 0));
     glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &transform.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &transform.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &transform.view[0][0]);
     m_cone->draw();
 
-    transform.model=glm::translate(transform.model, glm::vec3(0, 0, -d-1));
+    transform.model=glm::translate(transform.model, glm::vec3(0, -d-1, 0));
     transform.model=glm::rotate(transform.model, (float) (M_PI), glm::vec3(1.0, 0.0, 0.0));
-    transform.model=glm::translate(transform.model, glm::vec3(0, 0, -d+1));
+    transform.model=glm::translate(transform.model, glm::vec3(0, -d+1, 0));
     glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &transform.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &transform.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &transform.view[0][0]);
