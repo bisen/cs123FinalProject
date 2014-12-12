@@ -1,21 +1,19 @@
 #ifndef CONE_H
 #define CONE_H
+#include "shape.h"
 
-#include "GL/glew.h"
+#define CONE_FACES 2
 
-class Cone
+class Cone : public Shape
 {
 public:
-    //Uninitialized Cone
-    Cone();
-    //Initialized Cone
-    Cone(const GLuint vertexLocation, const GLuint normalLocation);
-    // Initialize Cone: generate VAO, vertex data, and buffer it on GPU
-    void init(const GLuint vertexLocation, const GLuint normalLocation);
-    void draw();
-private:
-    bool m_isInitialized;
-    GLuint m_vaoID;
+    Cone(int one, int two, float three);
+    virtual ~Cone();
+    void tesselate(int one, int two, float three);
+    void makeBuf();
+protected:
+    glm::vec3 getVertex(float theta, float y);
+    glm::vec3 getNormal(float theta, float y);
 };
 
 #endif // CONE_H
