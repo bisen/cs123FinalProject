@@ -7,7 +7,7 @@ class Ivy : public Plant
 {
 public:
     Ivy();
-    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
+    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
 };
 
 #endif // IVY_H

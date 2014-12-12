@@ -27,11 +27,13 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_phi = M_PI / 2.0f;
 
     m_plant = new Ivy();
+    m_cylinder = new Cylinder(50,50,0);
 }
 
 View::~View()
 {
     delete m_plant;
+    delete m_cylinder;
 }
 
 void View::initializeGL()
@@ -62,6 +64,8 @@ void View::initializeGL()
     m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_sphere.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
     m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
+    m_cylinder->tesselate(15,15,0);
+    m_cylinder->init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
 
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
@@ -97,7 +101,26 @@ void View::initializeGL()
     // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
+    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+
+    QImage bumpMap;
+    bumpMap.load(QString::fromStdString("assets/heightmapalt.png"));
+    bumpMap = QGLWidget::convertToGLFormat(bumpMap);
+
+    // Generate a new OpenGL texture ID to put our image into
+    glActiveTexture(GL_TEXTURE1);
+    m_bump_map_id = 0;
+    glGenTextures(1, &m_bump_map_id);
+
+    // Make the texture we just created the new active texture
+    glBindTexture(GL_TEXTURE_2D, m_bump_map_id);
+
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, bumpMap.width(), bumpMap.height(), GL_RGBA, GL_UNSIGNED_BYTE, bumpMap.bits());
+
+    // Set filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void View::paintGL()
@@ -121,10 +144,14 @@ void View::paintGL()
 
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
-    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
     glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.2, 0.2, 0.2);
     glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
+    glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
+    glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
+    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 150);
+    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 52);
+    glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
 
     glUseProgram(0);
 
@@ -142,7 +169,7 @@ void View::paintGL()
     glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
     glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
 
-    m_plant->render(m_shader, cylindertrans);
+    m_plant->render(m_plantshader, cylindertrans);
 
 
     glUseProgram(0);
@@ -154,16 +181,26 @@ void View::paintGL()
     transform1.model=glm::rotate(transform1.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
     transform1.model=glm::translate(transform1.model, glm::vec3(m_param_x_1, m_param_y_1, d1));
     transform1.model=glm::scale(transform1.model, glm::vec3(m_size_1, m_size_1, 1.0));
-    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
+    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.3, 0, 0);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
-    m_sphere.draw();
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cylinder->draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
+    m_cylinder->draw();
 
     transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, -d1-1));
@@ -172,6 +209,11 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     Transforms transform2 = m_transform;
@@ -179,16 +221,26 @@ void View::paintGL()
     transform2.model=glm::translate(transform2.model, glm::vec3(m_param_x_2, m_param_y_2, d2));
     transform2.model=glm::scale(transform2.model, glm::vec3(m_size_2, m_size_2, 1.0));
     glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 1, 0);
+    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0, 0.3, 0);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
-    m_sphere.draw();
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cylinder->draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
+    m_cylinder->draw();
 
     transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, -d2-1));
@@ -197,6 +249,11 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     Transforms transform3 = m_transform;
@@ -204,16 +261,26 @@ void View::paintGL()
     transform3.model=glm::translate(transform3.model, glm::vec3(m_param_x_3, m_param_y_3, d3));
     transform3.model=glm::scale(transform3.model, glm::vec3(m_size_3, m_size_3, 1.0));
     glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "color"), 0, 0, 1);
+    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0, 0, 0.3);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
-    m_sphere.draw();
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cylinder->draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
+    m_cylinder->draw();
 
     transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, -d3-1));
@@ -222,6 +289,11 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     Transforms transform4 = m_transform;
@@ -229,16 +301,26 @@ void View::paintGL()
     transform4.model=glm::translate(transform4.model, glm::vec3(m_param_x_4, m_param_y_4, d4));
     transform4.model=glm::scale(transform4.model, glm::vec3(m_size_4, m_size_4, 1.0));
     glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 1);
+    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.3, 0, 0.3);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
-    m_sphere.draw();
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cylinder->draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
+    m_cylinder->draw();
 
     transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, 1));
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
     transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, -d4-1));
@@ -247,6 +329,11 @@ void View::paintGL()
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
+    glFrontFace(GL_CW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
+    m_cone.draw();
+    glFrontFace(GL_CCW);
+    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
     m_cone.draw();
 
 

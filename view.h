@@ -49,6 +49,7 @@ private:
     LabCamera m_camera;
     Transforms m_transform;
 
+    Cylinder *m_cylinder;
     Sphere m_sphere;
     Cone m_cone;
     float m_fps;
@@ -75,6 +76,7 @@ private:
     Plant *m_plant;
 
     GLuint m_plantshader;
+    GLuint m_bump_map_id;
 
     float m_theta, m_phi;
 
