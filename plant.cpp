@@ -18,12 +18,18 @@ Plant::Plant()
     m_initial = new char[2];
     m_initial[0] = 'x';
     m_initial[1] = '\0';
+
+    m_num_vert = 0;
 }
 
 Plant::~Plant() {
     delete m_scenegraph;
     delete m_cyl;
     delete[] m_initial;
+
+    if(m_initialized) {
+        //delete[] m_buf;
+    }
 }
 
 void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation) {
@@ -88,26 +94,88 @@ void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation)
 
     m_cyl->tesselate(15,15,0);
     m_cyl->init(vertexLocation, normalLocation);
-    m_initialized = 1;
+    init(vertexLocation, normalLocation);
 }
 
 void Plant::render(GLuint shader, Transforms t) {
 
-    Transforms planttrans = t;
+//    glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &t.view[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &t.model[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &t.getTransform()[0][0]);
 
+
+    glBindVertexArray(m_vaoid);
+//    printf("%s", glewGetErrorString(glGetError()));
+    glDrawArrays(GL_TRIANGLES, 0, m_num_vert);
+
+    glBindVertexArray(0);
+
+
+}
+
+void Plant::copyAndMult(GLfloat *buf, int &index, glm::mat4 matrix, glm::mat4 inverseMat) {
+    glm::vec4 newVec = matrix * glm::vec4(buf[index], buf[index+1], buf[index+2], 1.0f);
+    glm::vec4 newNorm = inverseMat * glm::vec4(buf[index+3], buf[index+4], buf[index+5], 0.0f);
+
+    m_buf[index] = newVec.x;
+    m_buf[index+1] = newVec.y;
+    m_buf[index+2] = newVec.z;
+
+    m_buf[index+3] = newNorm.x;
+    m_buf[index+4] = newNorm.y;
+    m_buf[index+5] = newNorm.z;
+
+    index += 6;
+
+}
+
+void Plant::init(GLuint vertexLocation, GLuint normalLocation) {
+
+    int base_bufsize = m_cyl->getNumVert();
 
     int s = m_scenegraph->size();
+    glm::vec3 **positions = m_cyl->getPositions();
+    glm::vec3 **normals = m_cyl->getNormals();
+
+    GLfloat *cyl_buf = m_cyl->getBuf();
+
+    int count = 0;
+
+    m_buf = new GLfloat[base_bufsize * 6 * s];
+    m_num_vert = base_bufsize * s;
 
     for(int i = 0; i < s; i++) {
         Node n = m_scenegraph->at(i);
 
-        planttrans.model = t.model * glm::rotate(glm::mat4(1.0f), (float)M_PI / 2.0f, glm::vec3(1.0f, 0.0f, 0.0f)) * n.model;
+        glm::mat4 curmodel = n.model;
+        glm::mat4 inverseModel = glm::inverse(n.model);
 
-        glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &planttrans.getTransform()[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &planttrans.model[0][0]);
-        glUniform3f(glGetUniformLocation(shader, "color"), n.color.r, n.color.g, n.color.b);
-
-        m_cyl->draw();
-
+        //For each of the three cylinder faces
+        for(int x = 0; x < CYL_FACES; x++) {
+            //Multiply each vertex by the model matrix and add it to the buffer
+            for(int k = 0; k < base_bufsize; k++) {
+                copyAndMult(cyl_buf, count, curmodel, inverseModel);
+            }
+        }
     }
+
+    glGenVertexArrays(1, &m_vaoid);
+    glBindVertexArray(m_vaoid);
+
+    glGenBuffers(1, &m_vboid);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vboid);
+    glBufferData(GL_ARRAY_BUFFER, m_num_vert * 6 * sizeof(GLfloat), m_buf, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(vertexLocation);
+    glEnableVertexAttribArray(normalLocation);
+
+    glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*) 0);
+    glVertexAttribPointer(normalLocation, 3, GL_FLOAT, GL_TRUE,  6*sizeof(GLfloat), (void*) (sizeof(GLfloat)*3));
+    printf("%d\n", glGetError());
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    m_initialized = 1;
 }

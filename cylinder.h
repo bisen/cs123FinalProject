@@ -12,6 +12,11 @@ public:
     virtual ~Cylinder();
     void tesselate(int one, int two, float three);
     void makeBuf();
+
+    glm::vec3 **getPositions();
+    glm::vec3 **getNormals();
+
+    GLfloat *getBuf();
 protected:
     glm::vec3 getVertex(float theta, float y);
 

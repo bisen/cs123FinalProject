@@ -7,6 +7,7 @@ class Ivy : public Plant
 {
 public:
     Ivy();
+//    virtual ~Ivy();
     virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
 };
 

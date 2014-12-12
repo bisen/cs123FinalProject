@@ -18,6 +18,13 @@ Ivy::Ivy()
     m_initial[1] = '\0';
 }
 
+//Ivy::~Ivy() {
+//    if(m_initialized) {
+//        delete[] m_buf;
+//        m_initialized = 0;
+//    }
+//}
+
 void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation) {
     m_factor = 1.0f;// / pow(1.33f, (float)level);
 
