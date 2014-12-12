@@ -26,7 +26,7 @@ uniform float shininess;
 
 void main(){
     if(isBackFace) {
-        fragColor = vec4(1,1,1,1);
+        fragColor = vec4(0,0,0,1);
     } else {
         //vec3 texColor = texture(tex, texc).rgb;
         //texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
@@ -66,6 +66,16 @@ void main(){
                 color += (1.0/5) * diffuse_color;
             }
         }
+
+        /*
+        if (useLighting){
+            vec3 normal = (smoothShading) ? normal_cameraSpace : flat_normal_cameraSpace ;
+            vec3 vertex_to_light_cameraSpace = lightPosition_cameraSpace - position_cameraSpace;
+            float lam = dot(vertex_to_light_cameraSpace, normal);
+            float distance = length(lightPosition_worldSpace - position_worldSpace);
+            float light_power = 1;
+        }
+        */
 
         fragColor = vec4(color,1);
         //fragColor = vec4(color * texColor, 1);

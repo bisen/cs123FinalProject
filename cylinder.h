@@ -1,5 +1,6 @@
 #ifndef CYLINDER_H
 #define CYLINDER_H
+
 #include "shape.h"
 
 #define CYL_FACES 3
@@ -13,6 +14,7 @@ public:
     void makeBuf();
 protected:
     glm::vec3 getVertex(float theta, float y);
+
 };
 
 #endif // CYLINDER_H

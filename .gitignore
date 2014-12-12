@@ -1,3 +1,6 @@
 *.o
 *.user
 final
+ui_mainwindow.h
+moc_*
+qrc_*

@@ -1,5 +1,7 @@
 #include "cylinder.h"
 
+#define LEVEL 16
+
 Cylinder::Cylinder(int one, int two, float three)
 {
     m_p1 = one > 0 ? one : 1;

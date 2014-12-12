@@ -48,7 +48,6 @@ void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, G
         case 'a':
             n.model = glm::translate(glm::mat4(1.0f), translation) * rotation * glm::rotate(glm::mat4(1.0f), (float)-M_PI / 2, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 1.05f, 0.25f));
             translation = translation + glm::vec3(rotation * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
-            printVertex(glm::vec4(translation, 1.0f));
             n.color = color2;
             m_scenegraph->append(n);
             break;

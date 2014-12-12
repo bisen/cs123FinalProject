@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-View::View(QWidget *parent) : QGLWidget(parent)
+View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m_cone(Cone(50,50,0)), m_level(Level(&m_cylinder, &m_cone))
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -18,7 +18,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_camera.eye.x = 0.0f, m_camera.eye.y = 0.0f, m_camera.eye.z = 0.0f;
     m_camera.center.x = 0.0f, m_camera.center.y = 0.0f, m_camera.center.z = 0.0f;
     m_camera.up.x = 0.0f, m_camera.up.y = 1.0f, m_camera.up.z = 0.0f;
-    m_camera.fovy = 45.0f, m_camera.near = 0.1f, m_camera.far = 1000.0f;
+    m_camera.fovy = 70.0f, m_camera.near = 0.1f, m_camera.far = 1000.0f;
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -26,14 +26,28 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_theta = 0.0f;
     m_phi = M_PI / 2.0f;
 
-    m_plant = new Ivy();
-    m_cylinder = new Cylinder(50,50,0);
+//    m_plant = new Ivy();
+
+    m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+    m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
 }
 
 View::~View()
 {
-    delete m_plant;
-    delete m_cylinder;
+//    delete m_plant;
 }
 
 void View::initializeGL()
@@ -62,10 +76,10 @@ void View::initializeGL()
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
     m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
-    m_sphere.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
-    m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
-    m_cylinder->tesselate(15,15,0);
-    m_cylinder->init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
+    m_cylinder.tesselate(50,50,0);
+    m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
+    m_cone.tesselate(50,50,0);
+    m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
 
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
@@ -101,7 +115,7 @@ void View::initializeGL()
     // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+    //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 
     QImage bumpMap;
     bumpMap.load(QString::fromStdString("assets/heightmapalt.png"));
@@ -155,211 +169,73 @@ void View::paintGL()
 
     glUseProgram(0);
 
-    glUseProgram(m_plantshader);
-    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
-    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 1, 0, 0);
-    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
-    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
-    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
-    Transforms cylindertrans = m_transform;
-    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
+//    glUseProgram(m_plantshader);
+//    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
+//    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
+//    Transforms cylindertrans = m_transform;
+//    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
-    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
-
-    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
-    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
-
-    m_plant->render(m_plantshader, cylindertrans);
+//    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
 
 
-    glUseProgram(0);
+//    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
+//    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
+
+//    m_plant->render(m_plantshader, cylindertrans);
+
+
+//    glUseProgram(0);
 
     glUseProgram(m_shader);
 
-    // TODO: Put your drawing code here
-    Transforms transform1 = m_transform;
-    transform1.model=glm::rotate(transform1.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform1.model=glm::translate(transform1.model, glm::vec3(m_param_x_1, m_param_y_1, d1));
-    transform1.model=glm::scale(transform1.model, glm::vec3(m_size_1, m_size_1, 1.0));
-    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.3, 0, 0);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cylinder->draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cylinder->draw();
+    ///////////layer 1
+    m_level.draw(m_shader, d1, m_param_x_1, m_param_y_1, m_size_1, m_transform);
+    ///////////layer 2
+    m_level.draw(m_shader, d2, m_param_x_2, m_param_y_2, m_size_2, m_transform);
+    ///////////layer 3
+    m_level.draw(m_shader, d3, m_param_x_3, m_param_y_3, m_size_3, m_transform);
+    ///////////layer 4
+    m_level.draw(m_shader, d4, m_param_x_4, m_param_y_4, m_size_4, m_transform);
 
-    transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, 1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
+//    Transforms transformT = m_transform;
+//    transformT.model=glm::translate(transformT.model, glm::vec3(m_param_x_1+0.5*m_size_1, m_param_y_1, d1-0.4));
+//    transformT.model=glm::scale(transformT.model, glm::vec3(0.3, 0.3, 0.1));
+//    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
+//    m_sphere.draw();
 
-    transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, -d1-1));
-    transform1.model=glm::rotate(transform1.model, (float) (M_PI), glm::vec3(1.0, 0.0, 0.0));
-    transform1.model=glm::translate(transform1.model, glm::vec3(0, 0, -d1+1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform1.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform1.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform1.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    Transforms transform2 = m_transform;
-    transform2.model=glm::rotate(transform2.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform2.model=glm::translate(transform2.model, glm::vec3(m_param_x_2, m_param_y_2, d2));
-    transform2.model=glm::scale(transform2.model, glm::vec3(m_size_2, m_size_2, 1.0));
-    glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0, 0.3, 0);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cylinder->draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cylinder->draw();
-
-    transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, 1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, -d2-1));
-    transform2.model=glm::rotate(transform2.model, (float) (M_PI), glm::vec3(1.0, 0.0, 0.0));
-    transform2.model=glm::translate(transform2.model, glm::vec3(0, 0, -d2+1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform2.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform2.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform2.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    Transforms transform3 = m_transform;
-    transform3.model=glm::rotate(transform3.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform3.model=glm::translate(transform3.model, glm::vec3(m_param_x_3, m_param_y_3, d3));
-    transform3.model=glm::scale(transform3.model, glm::vec3(m_size_3, m_size_3, 1.0));
-    glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0, 0, 0.3);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cylinder->draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cylinder->draw();
-
-    transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, 1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, -d3-1));
-    transform3.model=glm::rotate(transform3.model, (float) (M_PI), glm::vec3(1.0, 0.0, 0.0));
-    transform3.model=glm::translate(transform3.model, glm::vec3(0, 0, -d3+1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform3.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform3.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform3.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    Transforms transform4 = m_transform;
-    transform4.model=glm::rotate(transform4.model, (float) (-M_PI/2.0), glm::vec3(1.0, 0.0, 0.0));
-    transform4.model=glm::translate(transform4.model, glm::vec3(m_param_x_4, m_param_y_4, d4));
-    transform4.model=glm::scale(transform4.model, glm::vec3(m_size_4, m_size_4, 1.0));
-    glUseProgram(m_shader);
-    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.3, 0, 0.3);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cylinder->draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cylinder->draw();
-
-    transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, 1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-    transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, -d4-1));
-    transform4.model=glm::rotate(transform4.model, (float) (M_PI), glm::vec3(1.0, 0.0, 0.0));
-    transform4.model=glm::translate(transform4.model, glm::vec3(0, 0, -d4+1));
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transform4.getTransform()[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transform4.model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transform4.view[0][0]);
-    glFrontFace(GL_CW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_TRUE);
-    m_cone.draw();
-    glFrontFace(GL_CCW);
-    glUniform1i(glGetUniformLocation(m_shader, "isBackFace"), GL_FALSE);
-    m_cone.draw();
-
-
-    // TODO: 7.2 Animate the camera:
+//    transformT.model=glm::scale(transformT.model, glm::vec3(1.1, 1.1, 5));
+//    transformT.model=glm::translate(transformT.model, glm::vec3(0, 0, 0.6));
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
+//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
+//    m_cone.draw();
 
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
-    if (d1 < -1.9 || d1 >1.9) {
+    if (d1 >1.9) {
         m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d2 < -1.9 || d2 >1.9) {
+    if (d2 >1.9) {
         m_param_x_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d3 < -1.9 || d3 >1.9) {
+    if (d3 >1.9) {
         m_param_x_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     }
 
-    if (d4 < -1.9 || d4 >1.9) {
+    if (d4 >1.9) {
         m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));

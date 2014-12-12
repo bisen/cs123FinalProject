@@ -1,9 +1,9 @@
 #ifndef PLANT_H
 #define PLANT_H
 
+#include "cylinder.h"
 #include <QStack>
 #include "shape.h"
-#include "cylinder.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "lsys.h"
 #include <CS123Common.h>
