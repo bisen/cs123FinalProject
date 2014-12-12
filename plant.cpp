@@ -5,7 +5,7 @@ Plant::Plant()
 {
     m_scenegraph = new QList<Node>();
     m_initialized = 0;
-    m_cyl = new Cylinder(50,50,0);
+    m_cyl = new Cylinder(4,4,0);
 
     m_system = new LSys();
     char *ab = "ab";
@@ -28,7 +28,7 @@ Plant::~Plant() {
     delete[] m_initial;
 
     if(m_initialized) {
-        //delete[] m_buf;
+        delete[] m_buf;
     }
 }
 
@@ -92,9 +92,9 @@ void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation,
         }
     }
 
-    m_cyl->tesselate(15,15,0);
-    m_cyl->init(vertexLocation, normalLocation);
-    init(vertexLocation, normalLocation);
+    m_cyl->tesselate(4,4,0);
+    m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
+    this->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
 }
 
 void Plant::render(GLuint shader, Transforms t) {
@@ -103,6 +103,12 @@ void Plant::render(GLuint shader, Transforms t) {
 //    glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &t.model[0][0]);
 //    glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &t.getTransform()[0][0]);
 
+    glUniform1i(glGetUniformLocation(shader, "wrap"), 1);
+    glUniform1f(glGetUniformLocation(shader, "radius"), 0.5f);
+    glUniform3f(glGetUniformLocation(shader, "center"), 0,0,0);
+    glUniform1i(glGetUniformLocation(shader, "useTexture"), 0);
+
+    glUniform3f(glGetUniformLocation(shader, "diffuse_color"), 0,1,0);
 
     glBindVertexArray(m_vaoid);
 //    printf("%s", glewGetErrorString(glGetError()));
@@ -110,12 +116,18 @@ void Plant::render(GLuint shader, Transforms t) {
 
     glBindVertexArray(0);
 
+    glUniform3f(glGetUniformLocation(shader, "diffuse_color"), 0.5f,0.5f,0.5f);
+    glUniform1i(glGetUniformLocation(shader, "useTexture"), 1);
+
+
+
 
 }
 
-void Plant::copyAndMult(GLfloat *buf, int &index, glm::mat4 matrix, glm::mat4 inverseMat) {
-    glm::vec4 newVec = matrix * glm::vec4(buf[index], buf[index+1], buf[index+2], 1.0f);
-    glm::vec4 newNorm = inverseMat * glm::vec4(buf[index+3], buf[index+4], buf[index+5], 0.0f);
+void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, glm::mat4 inverseMat) {
+    assert(index % 11 == 0);
+    glm::vec4 newVec = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f);
+    glm::vec4 newNorm = glm::normalize(inverseMat * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
 
     m_buf[index] = newVec.x;
     m_buf[index+1] = newVec.y;
@@ -125,11 +137,15 @@ void Plant::copyAndMult(GLfloat *buf, int &index, glm::mat4 matrix, glm::mat4 in
     m_buf[index+4] = newNorm.y;
     m_buf[index+5] = newNorm.z;
 
-    index += 6;
+    m_buf[index+6] = buf[index+6];
+    m_buf[index+7] = buf[index+7];
+    m_buf[index+8] = buf[index+8];
+    m_buf[index+9] = buf[index+9];
+    m_buf[index+10] = buf[index+10];
 
 }
 
-void Plant::init(GLuint vertexLocation, GLuint normalLocation) {
+void Plant::init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
 
     int base_bufsize = m_cyl->getNumVert();
 
@@ -141,7 +157,7 @@ void Plant::init(GLuint vertexLocation, GLuint normalLocation) {
 
     int count = 0;
 
-    m_buf = new GLfloat[base_bufsize * 6 * s];
+    m_buf = new GLfloat[base_bufsize * 11 * s];
     m_num_vert = base_bufsize * s;
 
     for(int i = 0; i < s; i++) {
@@ -149,13 +165,12 @@ void Plant::init(GLuint vertexLocation, GLuint normalLocation) {
 
         glm::mat4 curmodel = n.model;
         glm::mat4 inverseModel = glm::inverse(n.model);
+        int cyl_index = 0;
 
-        //For each of the three cylinder faces
-        for(int x = 0; x < CYL_FACES; x++) {
-            //Multiply each vertex by the model matrix and add it to the buffer
-            for(int k = 0; k < base_bufsize; k++) {
-                copyAndMult(cyl_buf, count, curmodel, inverseModel);
-            }
+        for(int k = 0; k < base_bufsize; k++) {
+            copyAndMult(cyl_buf, count, cyl_index, curmodel, inverseModel);
+            count += 11;
+            cyl_index += 11;
         }
     }
 
@@ -164,16 +179,17 @@ void Plant::init(GLuint vertexLocation, GLuint normalLocation) {
 
     glGenBuffers(1, &m_vboid);
     glBindBuffer(GL_ARRAY_BUFFER, m_vboid);
-    glBufferData(GL_ARRAY_BUFFER, m_num_vert * 6 * sizeof(GLfloat), m_buf, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_num_vert * 11 * sizeof(GLfloat), m_buf, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(vertexLocation);
     glEnableVertexAttribArray(normalLocation);
+    glEnableVertexAttribArray(tangentLocation);
+    glEnableVertexAttribArray(textureLocation);
 
-    glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*) 0);
-    glVertexAttribPointer(normalLocation, 3, GL_FLOAT, GL_TRUE,  6*sizeof(GLfloat), (void*) (sizeof(GLfloat)*3));
-    printf("%d\n", glGetError());
-
-
+    glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 11*sizeof(GLfloat), (void*) 0);
+    glVertexAttribPointer(normalLocation, 3, GL_FLOAT, GL_TRUE,  11*sizeof(GLfloat), (void*) (sizeof(GLfloat)*3));
+    glVertexAttribPointer(tangentLocation, 3, GL_FLOAT, GL_TRUE,  11*sizeof(GLfloat), (void*) (sizeof(GLfloat)*6));
+    glVertexAttribPointer(textureLocation, 2, GL_FLOAT, GL_FALSE,  11*sizeof(GLfloat), (void*) (sizeof(GLfloat)*9));
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 

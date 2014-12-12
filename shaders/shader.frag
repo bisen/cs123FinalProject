@@ -77,7 +77,7 @@ void main(){
         }
         */
 
-        fragColor = vec4(color,1);
-        fragColor = vec4(color * texColor, 1);
+        fragColor = vec4(diffuse_color.xyz,1);
+        if(useTexture == 1) fragColor = vec4(color * texColor, 1);
     }
 }

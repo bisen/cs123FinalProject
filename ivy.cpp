@@ -74,5 +74,5 @@ void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, G
 
     m_cyl->tesselate(15,15,0);
     m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
-    init(vertexLocation, normalLocation);
+    this->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
 }

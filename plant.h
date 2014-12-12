@@ -22,8 +22,8 @@ public:
     virtual ~Plant();
 
     void render(GLuint shader, Transforms t);
-    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
-    void init(GLuint vertexLocation, GLuint normalLocation);
+    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
+    void init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
 
     static void printVertex(glm::vec4 v) { printf("%f, %f, %f\n", v.x, v.y, v.z); }
 
@@ -31,7 +31,7 @@ public:
 
 protected:
 
-    void copyAndMult(GLfloat *buf, int &index, glm::mat4 matrix, glm::mat4 inverseMat);
+    void copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, glm::mat4 inverseMat);
 
     LSys *m_system;
     char *m_initial;
