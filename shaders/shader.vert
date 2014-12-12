@@ -23,6 +23,7 @@ uniform vec3 lightPosition_worldSpace;
 void main(){
 
     if(wrap) {
+        vec3 newcenter = (m * vec4(center.xyz, 1.0)).xyz;
         vec3 old_position_worldSpace = (m * vec4(position, 1.0)).xyz;
 
         float circumference = 2 * M_PI * radius;

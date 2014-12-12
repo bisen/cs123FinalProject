@@ -38,7 +38,7 @@ void main(){
         vec3 vertex_to_light_cameraSpace = lightPosition_cameraSpace - position_cameraSpace;
         float lam = dot(vertex_to_light_cameraSpace, normal);
         float distance = length(lightPosition_worldSpace - position_worldSpace);
-        float light_power = 3;
+        float light_power = 1;
 
         fragColor =  vec4(ambientColor + light_power*lam*diffuseColor/(distance*distance),1);
     } else{
