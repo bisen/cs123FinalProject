@@ -15,7 +15,7 @@ void Level::draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLf
 {
     transform.model=glm::translate(transform.model, glm::vec3(param_x, d, param_y));
     transform.model=glm::scale(transform.model, glm::vec3(size, 1.0, size));
-    glUniform3f(glGetUniformLocation(shader, "ambient_color"), 0.2, 0, 0);
+    glUniform3f(glGetUniformLocation(shader, "ambient_color"), 0.15, 0.1, 0.1);
     glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &transform.getTransform()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &transform.model[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &transform.view[0][0]);

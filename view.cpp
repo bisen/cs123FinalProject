@@ -118,7 +118,7 @@ void View::initializeGL()
     //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 
     QImage bumpMap;
-    bumpMap.load(QString::fromStdString("assets/heightmapalt.png"));
+    bumpMap.load(QString::fromStdString("assets/heightmaplarge.png"));
     bumpMap = QGLWidget::convertToGLFormat(bumpMap);
 
     // Generate a new OpenGL texture ID to put our image into
@@ -163,8 +163,8 @@ void View::paintGL()
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
     glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
-    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 150);
-    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 52);
+    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 320);
+    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 99);
     glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
 
     glUseProgram(0);

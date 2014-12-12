@@ -26,10 +26,10 @@ uniform float shininess;
 
 void main(){
     if(isBackFace) {
-        fragColor = vec4(0,0,0,1);
+        fragColor = vec4(0.5,0.5,0.1,1);
     } else {
-        //vec3 texColor = texture(tex, texc).rgb;
-        //texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
+        vec3 texColor = texture(tex, texc).rgb;
+        texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
         vec4 normal = normal_cameraSpace;
         if(useTexture > 0) {
             vec3 pv = cross(vec3(normal_cameraSpace),pu);
@@ -78,6 +78,6 @@ void main(){
         */
 
         fragColor = vec4(color,1);
-        //fragColor = vec4(color * texColor, 1);
+        fragColor = vec4(color * texColor, 1);
     }
 }
