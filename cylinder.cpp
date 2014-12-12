@@ -117,7 +117,7 @@ void Cylinder::tesselate(int one, int two, float three) {
             m_normals[1][(i * (m_p1+1)) + j] = getVertex(theta, y + R);
             m_normals[1][(i * (m_p1+1)) + j].y = 0.0f;
             m_tangents[1][(i * (m_p1+1)) + j] = glm::vec3(-sin(theta),0.0f,cos(theta));
-            m_textures[1][(i * (m_p1+1)) + j] = glm::vec2(1 - theta/(2*M_PI), y);
+            m_textures[1][(i * (m_p1+1)) + j] = glm::vec2(1 - theta/(2*M_PI), y + R);
         }
     }
 
