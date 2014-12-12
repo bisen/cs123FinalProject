@@ -174,22 +174,6 @@ void View::paintGL()
     ///////////layer 4
     m_level.draw(m_shader, d4, m_param_x_4, m_param_y_4, m_size_4, m_transform);
 
-//    Transforms transformT = m_transform;
-//    transformT.model=glm::translate(transformT.model, glm::vec3(m_param_x_1+0.5*m_size_1, m_param_y_1, d1-0.4));
-//    transformT.model=glm::scale(transformT.model, glm::vec3(0.3, 0.3, 0.1));
-//    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_sphere.draw();
-
-//    transformT.model=glm::scale(transformT.model, glm::vec3(1.1, 1.1, 5));
-//    transformT.model=glm::translate(transformT.model, glm::vec3(0, 0, 0.6));
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_cone.draw();
-
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
     if (d1 >1.9) {

@@ -10,7 +10,6 @@ DEPENDPATH += glm lib
 SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
-    sphere.cpp \
     cone.cpp \
     lib/ResourceLoader.cpp \
     lib/transforms.cpp \
@@ -19,18 +18,22 @@ SOURCES += main.cpp \
     cylinder.cpp \
     shape.cpp \
     ivy.cpp \
-    skybox.cpp
+    skybox.cpp \
+    level.cpp
 
 
 HEADERS += mainwindow.h \
     view.h \
     lib/ResourceLoader.h \
+    ivy.h \
     plant.h \
     lsys.h \
     cylinder.h \
     shape.h \
     ivy.h \
-    skybox.h
+    skybox.h \
+    lib/transforms.h \
+    level.h
 
 FORMS += mainwindow.ui
 
