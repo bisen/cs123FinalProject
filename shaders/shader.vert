@@ -79,7 +79,7 @@ void main(){
     } else {
         if(isBackFace) {
             if(abs(position.y) < 0.499f) {
-                gl_Position = mvp * vec4(position*1.02, 1.0);
+                gl_Position = mvp * vec4(position*1.025, 1.0);
             } else {
                 gl_Position= mvp * vec4(position, 1.0);
             }
@@ -94,7 +94,7 @@ void main(){
 
             vec4 vertexToLight = vec4(0);
             // Point Light
-            lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - position_cameraSpace);
+            lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - (position_cameraSpace));
         }
     }
 }
