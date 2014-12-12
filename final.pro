@@ -22,12 +22,14 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     view.h \
     lib/ResourceLoader.h \
+    ivy.h \
     plant.h \
     lsys.h \
     cylinder.h \
     shape.h \
     ivy.h \
     skybox.h \
+    lib/transforms.h \
     level.h
 
 FORMS += mainwindow.ui

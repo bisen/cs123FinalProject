@@ -118,7 +118,7 @@ void View::initializeGL()
     //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 
     QImage bumpMap;
-    bumpMap.load(QString::fromStdString("/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/heightmaplarge.png"));
+    bumpMap.load(QString::fromStdString("assets/heightmaplarger.png"));
     bumpMap = QGLWidget::convertToGLFormat(bumpMap);
 
     // Generate a new OpenGL texture ID to put our image into
@@ -160,13 +160,13 @@ void View::paintGL()
 
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
-    glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.2, 0.2, 0.2);
-    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
+    //glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.0, 0.0, 0.0);
+    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 30.0, 10.0, 30.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
     glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
-    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 320);
-    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 99);
+    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 2400);
+    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 800);
     glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
 
     glUseProgram(0);
@@ -200,22 +200,6 @@ void View::paintGL()
     m_level.draw(m_shader, d3, m_param_x_3, m_param_y_3, m_size_3, m_transform);
     ///////////layer 4
     m_level.draw(m_shader, d4, m_param_x_4, m_param_y_4, m_size_4, m_transform);
-
-//    Transforms transformT = m_transform;
-//    transformT.model=glm::translate(transformT.model, glm::vec3(m_param_x_1+0.5*m_size_1, m_param_y_1, d1-0.4));
-//    transformT.model=glm::scale(transformT.model, glm::vec3(0.3, 0.3, 0.1));
-//    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_sphere.draw();
-
-//    transformT.model=glm::scale(transformT.model, glm::vec3(1.1, 1.1, 5));
-//    transformT.model=glm::translate(transformT.model, glm::vec3(0, 0, 0.6));
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_cone.draw();
 
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);

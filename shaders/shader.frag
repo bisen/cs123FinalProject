@@ -16,7 +16,7 @@ uniform int useTexture = 0;
 uniform int textureWidth;
 uniform int textureHeight;
 
-uniform vec3 lightColor = vec3(1.0f);
+uniform vec3 lightColor = vec3(1.0f,1.0f,0.8f);
 
 // Material data
 uniform vec3 ambient_color;
@@ -26,7 +26,7 @@ uniform float shininess;
 
 void main(){
     if(isBackFace) {
-        fragColor = vec4(0.5,0.5,0.1,1);
+        fragColor = vec4(0.16,0.16,0.04,1);
     } else {
         vec3 texColor = texture(tex, texc).rgb;
         texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
@@ -50,20 +50,22 @@ void main(){
                 // Add specular component
                 vec4 lightReflection = normalize(-reflect(lightDir, normal));
                 vec4 eyeDirection = normalize(vec4(0,0,0,1) - position_cameraSpace);
-                float specIntensity = pow(max(0.0, dot(eyeDirection, lightReflection)), shininess);
+                float specIntensity = pow(max(0.0, dot(eyeDirection, lightReflection)), 5);
                 color += max (vec3(0), lightColor * specular_color * specIntensity);
             }
         } else {
             float intensity = 0;
             intensity += max(0.0, dot(lightDir, normal));
-            if(intensity > 0.8) {
+            if(intensity > 0.95) {
                 color += diffuse_color;
-            } else if(intensity > 0.5) {
-                color += (3.0/5) * diffuse_color;
-            } else if(intensity > 0.25) {
-                color += (2.0/5) * diffuse_color;
+            } else if(intensity > 0.8) {
+                color += (0.5) * diffuse_color;
+            } else if(intensity > 0.4) {
+                color += (0.2) * diffuse_color;
+            } else if(intensity > 0.2) {
+                color += (0.1) * diffuse_color;
             } else {
-                color += (1.0/5) * diffuse_color;
+                color += (0.05) * diffuse_color;
             }
         }
 
@@ -78,6 +80,7 @@ void main(){
         */
 
         fragColor = vec4(diffuse_color.xyz,1);
-        if(useTexture == 1) fragColor = vec4(color * texColor, 1);
+        if(useTexture == 1)
+            fragColor = vec4(clamp(color*0.8 + 0.1*texColor, vec3(0),vec3(1)), 1);
     }
 }
