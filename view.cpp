@@ -77,9 +77,9 @@ void View::initializeGL()
 
     m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
-    m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
+    m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
     m_cone.tesselate(50,50,0);
-    m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"));
+    m_cone.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
 
 
     // Enable depth testing, so that objects are occluded based on depth instead of drawing order
@@ -115,7 +115,28 @@ void View::initializeGL()
     // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-//    m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"));
+    //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+
+    QImage bumpMap;
+    bumpMap.load(QString::fromStdString("assets/heightmapalt.png"));
+    bumpMap = QGLWidget::convertToGLFormat(bumpMap);
+
+    // Generate a new OpenGL texture ID to put our image into
+    glActiveTexture(GL_TEXTURE1);
+    m_bump_map_id = 0;
+    glGenTextures(1, &m_bump_map_id);
+
+    // Make the texture we just created the new active texture
+    glBindTexture(GL_TEXTURE_2D, m_bump_map_id);
+
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, bumpMap.width(), bumpMap.height(), GL_RGBA, GL_UNSIGNED_BYTE, bumpMap.bits());
+
+    // Set filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void View::paintGL()
@@ -142,6 +163,11 @@ void View::paintGL()
     glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.2, 0.2, 0.2);
     glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
+    glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
+    glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
+    glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 150);
+    glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 52);
+    glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
 
     glUseProgram(0);
 
@@ -154,6 +180,7 @@ void View::paintGL()
 //    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
 //    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
+
 
 //    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
 //    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);

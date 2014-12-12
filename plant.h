@@ -26,7 +26,7 @@ public:
     void render(GLuint shader, Transforms t);
 
 //    void gen(int n);
-    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
+    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
 
     static void printVertex(glm::vec4 v) { printf("%f, %f, %f\n", v.x, v.y, v.z); }
 
