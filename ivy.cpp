@@ -18,14 +18,7 @@ Ivy::Ivy()
     m_initial[1] = '\0';
 }
 
-//Ivy::~Ivy() {
-//    if(m_initialized) {
-//        delete[] m_buf;
-//        m_initialized = 0;
-//    }
-//}
-
-void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation) {
+void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
     m_factor = 1.0f;// / pow(1.33f, (float)level);
 
     glm::vec3 color1 = glm::vec3(0.408f, 0.259f, 0.102f); //Brown
@@ -80,6 +73,6 @@ void Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation) {
     }
 
     m_cyl->tesselate(15,15,0);
-    m_cyl->init(vertexLocation, normalLocation);
-    m_initialized = 1;
+    m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
+    init(vertexLocation, normalLocation);
 }

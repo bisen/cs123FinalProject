@@ -22,7 +22,6 @@ public:
     virtual ~Plant();
 
     void render(GLuint shader, Transforms t);
-
     virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation);
     void init(GLuint vertexLocation, GLuint normalLocation);
 
