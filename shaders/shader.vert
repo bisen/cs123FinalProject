@@ -78,7 +78,11 @@ void main(){
         gl_Position =  mvp*inverse(m)*cyl_position;
     } else {
         if(isBackFace) {
-            gl_Position = mvp * vec4(position*1.02, 1.0);
+            if(abs(position.y-0.5f) < 0.499f) {
+                gl_Position = mvp * vec4(position*1.02, 1.0);
+            } else {
+                gl_Position= mvp * vec4(position, 1.0);
+            }
         } else {
             texc = texCoord; //vec2((texCoord.x*2)-floor(texCoord.x*3),texCoord.y);
 
