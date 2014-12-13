@@ -84,6 +84,7 @@ private:
 
     GLuint m_plantshader;
     GLuint m_bump_map_id;
+    GLuint m_plant_tex_id;
 
     float m_theta, m_phi;
     bool m_use_cel_shading = true;

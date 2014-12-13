@@ -19,6 +19,7 @@ uniform sampler2D tex;
 uniform int useTexture = 0;
 uniform int textureWidth;
 uniform int textureHeight;
+uniform float blend;
 
 uniform vec3 lightColor = vec3(1.0f,1.0f,0.8f);
 
@@ -33,7 +34,7 @@ void main(){
         fragColor = vec4(0.16,0.16,0.04,1);
     } else {
         vec3 texColor = texture(tex, texc).rgb;
-        texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
+        //texColor = clamp(texColor + vec3(1-useTexture), vec3(0), vec3(1));
         vec4 normal = normal_cameraSpace;
         if(useTexture > 0 && useBumpMapping) {
             vec3 pv = cross(vec3(normal_cameraSpace),pu);
@@ -74,7 +75,7 @@ void main(){
         }
 
         fragColor = vec4(color.xyz,1);
-        if(useTexture == 1 && blendTexture)
-            fragColor = vec4(clamp(color*0.95 + 0.05*texColor, vec3(0),vec3(1)), 1);
+        if(blendTexture)
+            fragColor = vec4(clamp(color*(1-blend) + blend*texColor, vec3(0),vec3(1)), 1);
     }
 }

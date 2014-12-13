@@ -107,6 +107,8 @@ void Plant::render(GLuint shader, Transforms t) {
     glUniform1f(glGetUniformLocation(shader, "radius"), 0.5f);
     glUniform3f(glGetUniformLocation(shader, "center"), 0,0,0);
     glUniform1i(glGetUniformLocation(shader, "useTexture"), 0);
+    glUniform1i(glGetUniformLocation(shader, "tex"), 2);
+    glUniform1f(glGetUniformLocation(shader, "blend"), 0.5f);
 
     glUniform3f(glGetUniformLocation(shader, "diffuse_color"), 0,1,0);
     glUniform3f(glGetUniformLocation(shader, "ambient_color"), 0.1,0.1,0.1);
@@ -119,6 +121,8 @@ void Plant::render(GLuint shader, Transforms t) {
     glBindVertexArray(0);
 
     glUniform3f(glGetUniformLocation(shader, "diffuse_color"), 0.5f,0.5f,0.5f);
+    glUniform1f(glGetUniformLocation(shader, "blend"), 0.05f);
+    glUniform1i(glGetUniformLocation(shader, "tex"), 1);
     glUniform1i(glGetUniformLocation(shader, "useTexture"), 1);
 
 
@@ -140,11 +144,11 @@ void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, g
     m_buf[index+4] = newNorm.y;
     m_buf[index+5] = newNorm.z;
 
-    m_buf[index+6] = buf[index+6];
-    m_buf[index+7] = buf[index+7];
-    m_buf[index+8] = buf[index+8];
-    m_buf[index+9] = buf[index+9];
-    m_buf[index+10] = buf[index+10];
+    m_buf[index+6] = buf[index2+6];
+    m_buf[index+7] = buf[index2+7];
+    m_buf[index+8] = buf[index2+8];
+    m_buf[index+9] = buf[index2+9];
+    m_buf[index+10] = buf[index2+10];
 
 }
 

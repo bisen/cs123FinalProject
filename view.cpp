@@ -136,6 +136,25 @@ void View::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    QImage plantTex;
+    plantTex.load(QString::fromStdString("assets/plant.jpg"));
+    plantTex = QGLWidget::convertToGLFormat(plantTex);
+
+    // Generate a new OpenGL texture ID to put our image into
+    glActiveTexture(GL_TEXTURE2);
+    m_plant_tex_id = 0;
+    glGenTextures(1, &m_plant_tex_id);
+
+    // Make the texture we just created the new active texture
+    glBindTexture(GL_TEXTURE_2D, m_plant_tex_id);
+
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, plantTex.width(), plantTex.height(), GL_RGBA, GL_UNSIGNED_BYTE, plantTex.bits());
+
+    // Set filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     m_level.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 }
 
@@ -167,6 +186,7 @@ void View::paintGL()
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 2400);
     glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 800);
+    glUniform1f(glGetUniformLocation(m_shader, "blend"), 0.05f);
 
     glUseProgram(0);
 
