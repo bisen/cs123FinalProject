@@ -43,6 +43,24 @@ glm::vec3 Cylinder::getVertex(float theta, float y) {
     return glm::vec3(R * glm::cos(theta), y, R * glm::sin(theta));
 }
 
+glm::vec3 **Cylinder::getPositions() {
+    if(m_is_tesselated) {
+        return m_positions;
+    }
+    return NULL;
+}
+
+glm::vec3 **Cylinder::getNormals() {
+    if(m_is_tesselated) {
+        return m_normals;
+    }
+    return NULL;
+}
+
+GLfloat *Cylinder::getBuf() {
+    return m_buf;
+}
+
 void Cylinder::tesselate(int one, int two, float three) {
     m_p1 = one > 2 ? one : 3;
     m_p2 = two > 0 ? two : 1;
@@ -167,7 +185,7 @@ void Cylinder::makeBuf() {
              * 1 --- 3,4
              * |    / |
              * |  /   |
-             * 2,5 ---6
+             * 2,5 ---6old_position_worldSpace
              */
 
                 //First triangle

@@ -75,7 +75,7 @@ void View::initializeGL()
     m_plantshader = ResourceLoader::loadShaders(":/shaders/plant.vert", ":/shaders/plant.frag");
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
-    m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
+    m_skybox.init(glGetAttribLocation(m_shader, "position"), "/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosY.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
     m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
     m_cone.tesselate(50,50,0);
@@ -135,6 +135,8 @@ void View::initializeGL()
     // Set filtering options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    m_level.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 }
 
 void View::paintGL()
@@ -159,7 +161,7 @@ void View::paintGL()
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
     //glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.0, 0.0, 0.0);
-    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 30.0, 10.0, 30.0);
+    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), -30.0, 10.0, -30.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
     glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);

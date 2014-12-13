@@ -11,6 +11,8 @@ out vec2 texc;
 out vec4 position_cameraSpace;
 out vec4 normal_cameraSpace;
 out vec3 pu;
+out vec4 normal_worldSpace;
+out vec4 normal_objectSpace;
 
 // Transformation matrices
 uniform mat4 mvp;
@@ -39,22 +41,33 @@ uniform bool wrap = false;
 void main(){
 
     if(wrap) {
-        vec3 newcenter = (m * vec4(center.xyz, 1.0)).xyz;
-        vec3 old_position_worldSpace = (m * vec4(position, 1.0)).xyz;
+        texc = texCoord;
 
         float circumference = 2 * M_PI * radius;
 
-        float u = old_position_worldSpace.x / circumference;
+        vec3 position2 = position + normal;
+
+        float u = position.x / circumference;
         float theta = u * 2 * M_PI;
+        float theta2 = (position2.x / circumference) * 2 * M_PI;
+        float r = -radius + position.z;
+        float r2 = -radius + position2.z;
 
-        float newx = radius * cos(theta);
-        float newz = (radius-old_position_worldSpace.z) * sin(theta);
+        float newx = r * cos(theta);
+        float newz = r * sin(theta);
 
-        vec4 cyl_position = vec4(newx, old_position_worldSpace.y, newz, 1.0) + vec4(center.xyz, 1.0);
+        vec4 cyl_position = vec4(newx, position.y, newz, 1.0);
+        vec4 cyl_position2 = vec4(r2 * cos(theta2), position2.y, r2 * sin(theta), 1.0);
+        vec4 cyl_normal = cyl_position2 - cyl_position;
 
-        vec3 position_worldSpace = old_position_worldSpace;
-        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
-        position_cameraSpace = (v * m * vec4(new_position, 1.0));
+        normal_objectSpace = normalize(vec4(cyl_normal.xyz, 1.0));
+
+//        vec3 position_worldSpace = (m * vec4(position, 1.0)).xyz;
+//        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
+        position_cameraSpace = (v * m * cyl_position);
+        normal_cameraSpace = -normalize( inverse(transpose(v * m)) * normalize(vec4(cyl_normal.xyz, 0)));
+        normal_worldSpace = -normalize((m * normalize(vec4(cyl_normal.xyz, 0))));
+        lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - (position_cameraSpace));
 
         /*
         vec3 vertexPosition_cameraSpace = (v*m * vec4(new_position,1)).xyz;
@@ -75,7 +88,7 @@ void main(){
       (0,0)    (max,0)
     */
 
-        gl_Position =  mvp*inverse(m)*cyl_position;
+        gl_Position =  mvp*cyl_position;
     } else {
         if(isBackFace) {
             if(abs(position.y) < 0.499f) {

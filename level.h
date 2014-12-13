@@ -13,8 +13,9 @@ public:
     virtual ~Level();
     void draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLfloat size, Transforms transform);
     void drawIvy(GLuint shader, Transforms t);
+    void init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
 private:
-    Ivy *m_ivy;
+    Plant *m_ivy;
     Cone *m_cone;
     Cylinder *m_cylinder;
 };
