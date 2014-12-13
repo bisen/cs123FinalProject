@@ -24,6 +24,7 @@ uniform vec3 lightPosition_worldSpace;
 
 uniform bool useLighting;     // Whether to calculate lighting using lighting equation
 uniform bool isBackFace;
+uniform bool useCelShading = true;
 uniform vec3 allBlack = vec3(1);
 
 uniform int textureWidth;
@@ -119,7 +120,7 @@ void main(){
 
         gl_Position =  mvp*cyl_position;
     } else {
-        if(isBackFace) {
+        if(isBackFace && useCelShading) {
             if(abs(position.y) < 0.499f) {
                 gl_Position = mvp * vec4(position*1.025, 1.0);
             } else {

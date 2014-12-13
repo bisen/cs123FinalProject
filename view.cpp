@@ -89,7 +89,7 @@ void View::initializeGL()
     m_plantshader = ResourceLoader::loadShaders(":/shaders/plant.vert", ":/shaders/plant.frag");
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
-    m_skybox.init(glGetAttribLocation(m_shader, "position"), "/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosY.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegY.png");
+    m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
     m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
     m_cone.tesselate(50,50,0);
@@ -150,14 +150,29 @@ void View::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-//    m_level1.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
-//    m_level2.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
-//    m_level3.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
-//    m_level4.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
-
     for(int i = 0; i < PLANTS; i++){
         m_plant[i]->parseSystem(16, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
     }
+
+    QImage plantTex;
+    plantTex.load(QString::fromStdString("assets/plant.jpg"));
+    plantTex = QGLWidget::convertToGLFormat(plantTex);
+
+    // Generate a new OpenGL texture ID to put our image into
+    glActiveTexture(GL_TEXTURE2);
+    m_plant_tex_id = 0;
+    glGenTextures(1, &m_plant_tex_id);
+
+    // Make the texture we just created the new active texture
+    glBindTexture(GL_TEXTURE_2D, m_plant_tex_id);
+
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, plantTex.width(), plantTex.height(), GL_RGBA, GL_UNSIGNED_BYTE, plantTex.bits());
+
+    // Set filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     m_level1.setSystem(m_plant[rand() % PLANTS]);
     m_level2.setSystem(m_plant[rand() % PLANTS]);
     m_level3.setSystem(m_plant[rand() % PLANTS]);
@@ -192,30 +207,7 @@ void View::paintGL()
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "textureWidth"), 2400);
     glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 800);
-    glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
-
-    glUseProgram(0);
-
-//    glUseProgram(m_plantshader);
-//    glUniform1i(glGetUniformLocation(m_plantshader, "useLighting"), GL_TRUE);
-//    glUniform3f(glGetUniformLocation(m_plantshader, "ambient_color"), 0.2, 0.2, 0.2);
-//    glUniform3f(glGetUniformLocation(m_plantshader, "lightPosition_worldSpace"), 3.0, 1.0, 3.0);
-//    glUniform1i(glGetUniformLocation(m_plantshader, "smoothShading"), GL_TRUE);
-//    Transforms cylindertrans = m_transform;
-//    cylindertrans.model = glm::translate(glm::mat4x4(), glm::vec3(0.0f, -1.0f, 0.0f));
-
-//    glUniform1f(glGetUniformLocation(m_plantshader, "radius"), 2.0f);
-
-
-//    glUniform3f(glGetUniformLocation(m_plantshader, "color"), 0, 1, 0);
-//    glUniformMatrix4fv(glGetUniformLocation(m_plantshader, "v"), 1, GL_FALSE, &cylindertrans.view[0][0]);
-
-//    m_plant->render(m_plantshader, cylindertrans);
-
-
-//    glUseProgram(0);
-
-    glUseProgram(m_shader);
+    glUniform1f(glGetUniformLocation(m_shader, "blend"), 0.05f);
 
     ///////////layer 1
     glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_1);
@@ -322,8 +314,8 @@ void View::mouseMoveEvent(QMouseEvent *event)
     int deltaY = event->y() - height() / 2;
     if (!deltaX && !deltaY) return;
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
-    m_dir_theta=max(min(m_dir_theta+((float) deltaX/80.0),4.0),-4.0);
-    m_dir_y=max(min(m_dir_y-((float) deltaY/240.0),1.8),-1.8);
+    m_dir_theta=max(min(m_dir_theta+((float) deltaX/80.0),3.0),-3.0);
+    m_dir_y=max(min(m_dir_y-((float) deltaY/240.0),1.5),-1.5);
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
@@ -338,19 +330,43 @@ void View::keyPressEvent(QKeyEvent *event)
     switch(event->key()) {
     case Qt::Key_Up:
         //m_phi += -M_PI / 24;
-        m_dir_y++;
+        m_dir_y = max(min(m_dir_y+1,1.5f),-1.5f);
         break;
     case Qt::Key_Down:
         //m_phi += M_PI / 24;
-        m_dir_y--;
+        m_dir_y = max(min(m_dir_y-1,1.5f),-1.5f);
         break;
     case Qt::Key_Left:
         //m_theta += -M_PI / 24;
-        m_dir_theta--;
+        m_dir_theta = max(min(m_dir_theta-1,3.0f),-3.0f);
         break;
     case Qt::Key_Right:
         //m_theta += M_PI / 24;
-        m_dir_theta++;
+        m_dir_theta = max(min(m_dir_theta+1,3.0f),-3.0f);
+        break;
+    case Qt::Key_Z:
+        m_use_bump_mapping = !m_use_bump_mapping;
+        if(m_use_bump_mapping) {
+            glUniform1i(glGetUniformLocation(m_shader, "useBumpMapping"), GL_TRUE);
+        } else {
+            glUniform1i(glGetUniformLocation(m_shader, "useBumpMapping"), GL_FALSE);
+        }
+        break;
+    case Qt::Key_X:
+        m_use_cel_shading = !m_use_cel_shading;
+        if(m_use_cel_shading) {
+            glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_TRUE);
+        } else {
+            glUniform1i(glGetUniformLocation(m_shader, "useCelShading"), GL_FALSE);
+        }
+        break;
+    case Qt::Key_C:
+        m_blend_texture = !m_blend_texture;
+        if(m_blend_texture) {
+            glUniform1i(glGetUniformLocation(m_shader, "blendTexture"), GL_TRUE);
+        } else {
+            glUniform1i(glGetUniformLocation(m_shader, "blendTexture"), GL_FALSE);
+        }
         break;
     }
 
@@ -380,8 +396,3 @@ void View::updateCamera()
     if (aspectRatio > 0) m_transform.projection = glm::perspective(m_camera.fovy, aspectRatio, m_camera.near, m_camera.far);
     if (aspectRatio > 0) m_transform.view = glm::lookAt(m_camera.eye, m_camera.center, m_camera.up);
 }
-
-//void View::drawCylinder()
-//{
-
-//}
