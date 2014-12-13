@@ -41,6 +41,8 @@ uniform bool wrap = false;
 void main(){
 
     if(wrap) {
+        texc = texCoord;
+
         float circumference = 2 * M_PI * radius;
 
         vec3 position2 = position + normal;
@@ -65,6 +67,7 @@ void main(){
         position_cameraSpace = (v * m * cyl_position);
         normal_cameraSpace = -normalize( inverse(transpose(v * m)) * normalize(vec4(cyl_normal.xyz, 0)));
         normal_worldSpace = -normalize((m * normalize(vec4(cyl_normal.xyz, 0))));
+        lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - (position_cameraSpace));
 
         /*
         vec3 vertexPosition_cameraSpace = (v*m * vec4(new_position,1)).xyz;
