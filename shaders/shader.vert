@@ -11,6 +11,8 @@ out vec2 texc;
 out vec4 position_cameraSpace;
 out vec4 normal_cameraSpace;
 out vec3 pu;
+out vec4 normal_worldSpace;
+out vec4 normal_objectSpace;
 
 // Transformation matrices
 uniform mat4 mvp;
@@ -46,18 +48,23 @@ void main(){
         float u = position.x / circumference;
         float theta = u * 2 * M_PI;
         float theta2 = (position2.x / circumference) * 2 * M_PI;
+        float r = -radius + position.z;
+        float r2 = -radius + position2.z;
 
-        float newx = radius * cos(theta);
-        float newz = (radius-position.z) * sin(theta);
+        float newx = r * cos(theta);
+        float newz = r * sin(theta);
 
         vec4 cyl_position = vec4(newx, position.y, newz, 1.0);
-        vec4 cyl_position2 = vec4(radius * cos(theta2), position2.y, (radius-position2.z) * sin(theta), 1.0);
+        vec4 cyl_position2 = vec4(r2 * cos(theta2), position2.y, r2 * sin(theta), 1.0);
         vec4 cyl_normal = cyl_position2 - cyl_position;
+
+        normal_objectSpace = normalize(vec4(cyl_normal.xyz, 1.0));
 
 //        vec3 position_worldSpace = (m * vec4(position, 1.0)).xyz;
 //        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
         position_cameraSpace = (v * m * cyl_position);
-        normal_cameraSpace = -( inverse(transpose(v * m)) * normalize(cyl_normal));
+        normal_cameraSpace = -normalize( inverse(transpose(v * m)) * normalize(vec4(cyl_normal.xyz, 0)));
+        normal_worldSpace = -normalize((m * normalize(vec4(cyl_normal.xyz, 0))));
 
         /*
         vec3 vertexPosition_cameraSpace = (v*m * vec4(new_position,1)).xyz;

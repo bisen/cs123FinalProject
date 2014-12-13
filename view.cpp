@@ -161,7 +161,7 @@ void View::paintGL()
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
     //glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.0, 0.0, 0.0);
-    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), 30.0, 10.0, 30.0);
+    glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), -30.0, 10.0, -30.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
     glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
     glUniform1i(glGetUniformLocation(m_shader, "useTexture"), 1);

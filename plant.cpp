@@ -5,7 +5,7 @@ Plant::Plant()
 {
     m_scenegraph = new QList<Node>();
     m_initialized = 0;
-    m_cyl = new Cylinder(4,4,0);
+    m_cyl = new Cylinder(15,15,0);
 
     m_system = new LSys();
     char *ab = "ab";
@@ -92,7 +92,7 @@ void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation,
         }
     }
 
-    m_cyl->tesselate(4,4,0);
+    m_cyl->tesselate(15,15,0);
     m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
     this->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
 }
@@ -109,6 +109,8 @@ void Plant::render(GLuint shader, Transforms t) {
     glUniform1i(glGetUniformLocation(shader, "useTexture"), 0);
 
     glUniform3f(glGetUniformLocation(shader, "diffuse_color"), 0,1,0);
+    glUniform3f(glGetUniformLocation(shader, "ambient_color"), 0.1,0.1,0.1);
+
 
     glBindVertexArray(m_vaoid);
 //    printf("%s", glewGetErrorString(glGetError()));
@@ -127,7 +129,8 @@ void Plant::render(GLuint shader, Transforms t) {
 void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, glm::mat4 inverseMat) {
     assert(index % 11 == 0);
     glm::vec4 newVec = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f);
-    glm::vec4 newNorm = glm::normalize(inverseMat * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
+//    glm::vec4 newVec2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * (glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f) + glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
+    glm::vec4 newNorm = -glm::normalize(matrix * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
 
     m_buf[index] = newVec.x;
     m_buf[index+1] = newVec.y;

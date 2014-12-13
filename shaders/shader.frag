@@ -5,6 +5,8 @@ in vec2 texc;
 in vec4 lightDir;
 in vec4 position_cameraSpace;
 in vec4 normal_cameraSpace;
+in vec4 normal_worldSpace;
+in vec4 normal_objectSpace;
 in vec3 pu;
 out vec4 fragColor;
 
@@ -79,7 +81,7 @@ void main(){
         }
         */
 
-        fragColor = vec4(diffuse_color.xyz,1);
+        fragColor = vec4(color.xyz,1);
         if(useTexture == 1)
             fragColor = vec4(clamp(color*0.8 + 0.1*texColor, vec3(0),vec3(1)), 1);
     }
