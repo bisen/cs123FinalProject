@@ -66,22 +66,36 @@ vec4 transform_to_cylinder(vec3 inpos) {
     return outpos;
 }
 
+vec4 inverse_transform(vec3 outpos) {
+    float circumference = 2 * M_PI * radius;
+    float theta = atan(outpos.z / outpos.x);
+
+    float u = theta / (2 * M_PI);
+
+    float x = circumference * u;
+
+    float r = x / cos(theta);
+    float z = r + radius;
+
+    return vec4(x, outpos.y, z, 0);
+}
+
 void main(){
 
     if(wrap) {
         texc = texCoord;
 
         vec4 cyl_position = transform_to_cylinder(position);
-        vec4 cyl_position2 = transform_to_cylinder(position + normal);
-        vec4 cyl_normal = cyl_position2 - cyl_position;
+        //vec4 cyl_position2 = transform_to_cylinder(position + normal);
+        vec4 cyl_normal = transform_to_cylinder(normal);
 
-        normal_objectSpace = normalize(vec4(cyl_normal.xyz, 1.0));
+        normal_objectSpace = normalize(vec4(cyl_normal.xyz, 0.0));
 
 //        vec3 position_worldSpace = (m * vec4(position, 1.0)).xyz;
 //        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
         position_cameraSpace = (v * m * cyl_position);
-        normal_cameraSpace = -normalize( inverse(transpose(v * m)) * normalize(vec4(cyl_normal.xyz, 0)));
-        normal_worldSpace = -normalize((m * normalize(vec4(cyl_normal.xyz, 0))));
+        normal_worldSpace = normalize((inverse(v) * normal_objectSpace));
+        normal_cameraSpace = vec4(normalize(mat3(transpose(inverse(v * m))) * normal_objectSpace.xyz), 0);
         lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - (position_cameraSpace));
 
         /*
@@ -117,6 +131,9 @@ void main(){
             position_cameraSpace = v * m * vec4(position, 1.0);
             normal_cameraSpace = vec4(normalize(mat3(transpose(inverse(v * m))) * normal), 0);
             pu = normalize(mat3(transpose(inverse(v * m))) * tangent);
+
+            normal_worldSpace = normalize(inverse(m) * vec4(normal.xyz, 0));
+            normal_objectSpace = vec4(normal,0);
 
             gl_Position = mvp * vec4(position, 1.0);
 

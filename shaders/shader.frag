@@ -39,11 +39,11 @@ void main(){
             float ev = 1.0/textureHeight;
             float fu = (texture(tex,vec2(texc.x+eu,texc.y)).x - texture(tex,vec2(texc.x-eu,texc.y)).x)/(50*eu);
             float fv = (texture(tex,vec2(texc.x,texc.y+ev)).x - texture(tex,vec2(texc.x,texc.y-ev)).x)/(50*ev);
-            //normal = vec4(normalize(vec3(normal) + (fu * pu) - (fv * pv)),0);
+            normal = vec4(normalize(vec3(normal) + (fu * pu) - (fv * pv)),0);
         }
 
         vec3 color = ambient_color;
-        if(!useCelShading) {           
+        if(!useCelShading) {
             if(lightColor != vec3(0)) {
                 // Add diffuse component
                 float diffuseIntensity = max(0.0, dot(lightDir, normal));
@@ -82,7 +82,7 @@ void main(){
         */
 
         fragColor = vec4(color.xyz,1);
-        //if(useTexture == 1)
-            //fragColor = vec4(clamp(color*0.95 + 0.05*texColor, vec3(0),vec3(1)), 1);
+        if(useTexture == 1)
+            fragColor = vec4(clamp(color*0.95 + 0.05*texColor, vec3(0),vec3(1)), 1);
     }
 }

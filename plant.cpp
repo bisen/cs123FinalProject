@@ -130,7 +130,7 @@ void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, g
     assert(index % 11 == 0);
     glm::vec4 newVec = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f);
 //    glm::vec4 newVec2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * (glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f) + glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
-    glm::vec4 newNorm = -glm::normalize(matrix * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
+    glm::vec4 newNorm = glm::normalize(matrix * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
 
     m_buf[index] = newVec.x;
     m_buf[index+1] = newVec.y;
