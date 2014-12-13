@@ -5,8 +5,6 @@ in vec2 texc;
 in vec4 lightDir;
 in vec4 position_cameraSpace;
 in vec4 normal_cameraSpace;
-in vec4 normal_worldSpace;
-in vec4 normal_objectSpace;
 in vec3 pu;
 out vec4 fragColor;
 

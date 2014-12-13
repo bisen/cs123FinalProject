@@ -7,6 +7,7 @@
 #include "ivyalt.h"
 
 
+//Represents one level of the tower
 class Level
 {
 public:

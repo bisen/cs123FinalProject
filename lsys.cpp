@@ -81,17 +81,23 @@ char *LSys::generateStep(char *current, int n) {
 
     int currentlen = strlen(current);
 
+    //For each character in the string
     for(int i = 0; i < currentlen; i++) {
         bool happened = false;
+
+        //Try and apply all rules
         for(int j = 0; j < m_rules->length(); j++) {
             m_rules->at(j)->apply(current[i], &result_idx, happened);
         }
+
+        //If no rule happened, copy the current character
         if(!happened) {
             *result_idx = current[i];
             result_idx += 1;
         }
     }
 
+    //Recur
     delete[] current;
     return generateStep(result, n-1);
 }

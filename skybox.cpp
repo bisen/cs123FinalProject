@@ -32,8 +32,6 @@ void Skybox::init(const GLuint vertexLocation,
     // Make the texture we just created the new active texture
     glBindTexture(GL_TEXTURE_2D, m_textureObj);
 
-    //gluBuild2DMipmaps(GL_TEXTURE_2D, 3, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
-
     glTexImage2D (
       GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, PosXImage.width(), PosXImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, PosXImage.bits());
     glTexImage2D (

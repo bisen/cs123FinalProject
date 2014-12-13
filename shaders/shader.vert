@@ -11,8 +11,6 @@ out vec2 texc;
 out vec4 position_cameraSpace;
 out vec4 normal_cameraSpace;
 out vec3 pu;
-out vec4 normal_worldSpace;
-out vec4 normal_objectSpace;
 
 // Transformation matrices
 uniform mat4 mvp;
@@ -76,36 +74,13 @@ void main(){
         texc = texCoord;
 
         vec4 cyl_position = transform_to_cylinder(position);
-        //vec4 cyl_position2 = transform_to_cylinder(position + normal);
         vec4 cyl_normal = transform_to_cylinder(normal);
 
-        normal_objectSpace = normalize(vec4(cyl_normal.xyz, 0.0));
+        vec4 normal_objectSpace = normalize(vec4(cyl_normal.xyz, 0.0));
 
-//        vec3 position_worldSpace = (m * vec4(position, 1.0)).xyz;
-//        vec3 new_position = (inverse(m) * vec4(position_worldSpace, 1.0)).xyz;
         position_cameraSpace = (v * m * cyl_position);
-        normal_worldSpace = normalize((inverse(v) * normal_objectSpace));
         normal_cameraSpace = vec4(normalize(mat3(transpose(inverse(v * m))) * normal_objectSpace.xyz), 0);
         lightDir = normalize(v * vec4(lightPosition_worldSpace, 1) - (position_cameraSpace));
-
-        /*
-        vec3 vertexPosition_cameraSpace = (v*m * vec4(new_position,1)).xyz;
-        eyeDirection_cameraSpace = vec3(0,0,0) - vertexPosition_cameraSpace;
-
-        lightPosition_cameraSpace = (v * vec4(lightPosition_worldSpace, 1)).xyz;
-
-        flat_normal_cameraSpace = normal_cameraSpace = -( inverse(transpose(v * m)) * vec4(normalize(normal), 0)).xyz;
-        */
-
-        /*
-      (0, max)
-      ^
-      | v
-      |
-      |     u
-      *------>
-      (0,0)    (max,0)
-    */
 
         gl_Position =  mvp*cyl_position;
     } else {
@@ -116,14 +91,10 @@ void main(){
                 gl_Position= mvp * vec4(position, 1.0);
             }
         } else {
-            texc = texCoord; //vec2((texCoord.x*2)-floor(texCoord.x*3),texCoord.y);
-
+            texc = texCoord;
             position_cameraSpace = v * m * vec4(position, 1.0);
             normal_cameraSpace = vec4(normalize(mat3(transpose(inverse(v * m))) * normal), 0);
             pu = normalize(mat3(transpose(inverse(v * m))) * tangent);
-
-            normal_worldSpace = normalize(inverse(m) * vec4(normal.xyz, 0));
-            normal_objectSpace = vec4(normal,0);
 
             gl_Position = mvp * vec4(position, 1.0);
 

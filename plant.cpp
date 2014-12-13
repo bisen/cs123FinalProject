@@ -35,6 +35,7 @@ Plant::~Plant() {
     }
 }
 
+//Old unused parse code that makes a tree out of the sierpinksi triangle
 int Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
     m_factor = 1.0f / pow(1.33f, (float)level);
 
@@ -130,6 +131,7 @@ void Plant::render(GLuint shader, Transforms t) {
 
 }
 
+//Copy vertices from a sub object and apply a model matrix
 void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, glm::mat4 inverseMat) {
     assert(index % 11 == 0);
     glm::vec4 newVec = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f);

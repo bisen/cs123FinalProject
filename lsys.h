@@ -24,6 +24,7 @@ public:
 
 };
 
+//Stochastic rules are rules plus a probability
 class StochasticRule : public Rule
 {
 public:

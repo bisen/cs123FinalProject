@@ -9,6 +9,8 @@ Ivy::Ivy()
     m_system = new LSys();
     Rule *r1 = new Rule('x', "ab");
     Rule *r2 = new StochasticRule('b', "+x", "+a[+x][-x]", 0.5f);
+
+    //Sometimes wiggle the other way
     Rule *r3 = new StochasticRule('+', "~", "+", 0.03f);
 
 
@@ -20,7 +22,7 @@ Ivy::Ivy()
     m_initial[0] = 'x';
     m_initial[1] = '\0';
 
-    m_level = 18;
+    m_level = 16;
 }
 
 int Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
@@ -29,7 +31,7 @@ int Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GL
     char *lsys = m_system->generate(m_level, m_initial);
     int syslength = strlen(lsys);
 
-    glm::mat4 rotation = glm::mat4x4();// glm::rotate(glm::mat4(1.0f), (float)-M_PI / 2, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rotation = glm::mat4x4();
     glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
     glm::mat4 rotation_plus = glm::rotate(glm::mat4(1.0f), (float)M_PI / 12.0f, glm::vec3(0.0f, 0.0f, 1.0f));

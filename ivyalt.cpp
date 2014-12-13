@@ -8,8 +8,11 @@ IvyAlt::IvyAlt()
 
     m_system = new LSys();
     Rule *r1 = new Rule('x', "ab");
+    //Sometimes three branches, sometimes two
     Rule *r2 = new StochasticRule('b', "+x", "+a[+x][-x][~x]", 0.80f);
     Rule *r3 = new StochasticRule('b', "+x", "+a[+x][-x]", 0.90f);
+
+    //Sometimes the vine wiggles the other direction
     Rule *r4 = new StochasticRule('+', "$", "+", 0.10f);
 
     m_system->addRule(r1);
