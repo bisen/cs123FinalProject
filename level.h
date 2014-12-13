@@ -16,6 +16,7 @@ public:
     void draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLfloat size, Transforms transform);
     void drawIvy(GLuint shader, Transforms t);
     void init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
+    void setColor(glm::vec3 color) {m_color = color;}
 
     void setSystem(Plant *p) {m_ivy = p;}
 
@@ -24,6 +25,7 @@ private:
     Plant *m_ivy;
     Cone *m_cone;
     Cylinder *m_cylinder;
+    glm::vec3 m_color;
 };
 
 #endif // LEVEL_H
