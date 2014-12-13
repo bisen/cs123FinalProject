@@ -149,6 +149,7 @@ void View::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    //Generate 20 different plants to choose from, each with level 16
     for(int i = 0; i < PLANTS; i++){
         m_plant[i]->parseSystem(16, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
     }
@@ -196,6 +197,7 @@ void View::paintGL()
     m_skybox.draw();
     glUseProgram(0);
 
+    //Current locations of cylinders
     float d1 = (m_pos_y<0?-1:1)*2-fmod(m_pos_y,4);
     float d2 = (m_pos_y+1<0?-1:1)*2-fmod(m_pos_y+1,4);
     float d3 = (m_pos_y+2<0?-1:1)*2-fmod(m_pos_y+2,4);
@@ -211,6 +213,7 @@ void View::paintGL()
     glUniform1i(glGetUniformLocation(m_shader, "textureHeight"), 800);
     glUniform1f(glGetUniformLocation(m_shader, "blend"), 0.05f);
 
+    //Draw all layers
     ///////////layer 1
     glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_1);
     m_level1.draw(m_shader, d1, m_param_x_1, m_param_y_1, m_size_1, m_transform);
@@ -227,17 +230,23 @@ void View::paintGL()
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
 
+
+    //This if block triggers at each reposition of the tower level
     if (d1 >1.9) {
         m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+        //So this block executes once each reposition
         if(l1_mid) {
+            //Choose a new plant and color
             m_level1.setSystem(m_plant[rand() % PLANTS]);
             m_level1.setColor(glm::vec3(0.2,0.2,0.2) + glm::vec3((rand() % 4)*0.1));
             l1_mid = false;
         }
     }
 
+    //This one triggers when it has passed the middle
     if(d1 > 0.9 && d1 < 1.0) {
         l1_mid = true;
     }
@@ -332,6 +341,7 @@ void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
+    //Arrow keys control rotation, z,x,c, turn features on/off
     switch(event->key()) {
     case Qt::Key_Up:
         m_dir_y = max(min(m_dir_y+1,1.5f),-1.5f);
