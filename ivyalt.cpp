@@ -1,6 +1,6 @@
-#include "ivy.h"
+#include "ivyalt.h"
 
-Ivy::Ivy()
+IvyAlt::IvyAlt()
 {
     m_scenegraph = new QList<Node>();
     m_initialized = 0;
@@ -8,33 +8,35 @@ Ivy::Ivy()
 
     m_system = new LSys();
     Rule *r1 = new Rule('x', "ab");
-    Rule *r2 = new StochasticRule('b', "+x", "+a[+x][-x]", 0.5f);
-    Rule *r3 = new StochasticRule('+', "~", "+", 0.03f);
-
+    Rule *r2 = new StochasticRule('b', "+x", "+a[+x][-x][~x]", 0.80f);
+    Rule *r3 = new StochasticRule('b', "+x", "+a[+x][-x]", 0.90f);
+    Rule *r4 = new StochasticRule('+', "$", "+", 0.10f);
 
     m_system->addRule(r1);
     m_system->addRule(r2);
     m_system->addRule(r3);
+    m_system->addRule(r4);
 
     m_initial = new char[2];
     m_initial[0] = 'x';
     m_initial[1] = '\0';
 
-    m_level = 18;
+    m_level = 8;
 }
 
-int Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
-    m_factor = 1.0f;// / pow(1.33f, (float)level);
-
+int IvyAlt::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
+    m_factor = 1.0f;
     char *lsys = m_system->generate(m_level, m_initial);
     int syslength = strlen(lsys);
 
-    glm::mat4 rotation = glm::mat4x4();// glm::rotate(glm::mat4(1.0f), (float)-M_PI / 2, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rotation = glm::mat4x4();
     glm::vec3 translation = glm::vec3(0.0f, 0.0f, 0.0f);
 
     glm::mat4 rotation_plus = glm::rotate(glm::mat4(1.0f), (float)M_PI / 12.0f, glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 rotation_minus = glm::rotate(glm::mat4(1.0f), (float)-M_PI / 2.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-    glm::mat4 rotation_tilde = glm::rotate(glm::mat4(1.0f), (float)-M_PI / 12.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rotation_tilde = glm::rotate(glm::mat4(1.0f), (float)M_PI / 2.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rotation_dollar = glm::rotate(glm::mat4(1.0f), (float)-M_PI / 12.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+
 
 
 
@@ -60,6 +62,9 @@ int Ivy::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GL
             break;
         case '~':
             rotation = rotation_tilde * rotation;
+            break;
+        case '$':
+            rotation = rotation_dollar * rotation;
             break;
         case '[':
             rot_stack.push(rotation);

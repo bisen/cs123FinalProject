@@ -6,6 +6,9 @@ Skybox::Skybox()
 
 Skybox::~Skybox()
 {
+    glDeleteTextures(1, &m_textureObj);
+    glDeleteVertexArrays(1, &m_vaoID);
+    glDeleteBuffers(1, &m_bufid);
 }
 
 void Skybox::init(const GLuint vertexLocation,
@@ -102,9 +105,8 @@ void Skybox::init(const GLuint vertexLocation,
     glBindVertexArray(m_vaoID);
 
     // Vertex buffer init
-    GLuint vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glGenBuffers(1, &m_bufid);
+    glBindBuffer(GL_ARRAY_BUFFER, m_bufid);
 
     // Give our vertices to OpenGL.
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*36, &vertexData, GL_STATIC_DRAW);
@@ -121,7 +123,7 @@ void Skybox::init(const GLuint vertexLocation,
     );
 
     //Clean up -- unbind things
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 

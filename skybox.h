@@ -24,6 +24,7 @@ private:
     bool m_isInitialized;
     GLuint m_vaoID;
     GLuint m_textureObj;
+    GLuint m_bufid;
     QImage loadImage(const QString &filename);
 };
 

@@ -45,6 +45,8 @@ protected:
     GLuint m_vaoid, m_vboid;
 
     Cylinder *m_cyl;
+
+    int m_level;
 };
 
 #endif // PLANT_H

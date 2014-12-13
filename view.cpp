@@ -3,7 +3,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-#define PLANTS 10
+#define PLANTS 20
 
 View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m_cone(Cone(50,50,0)),
     m_level1(Level(&m_cylinder, &m_cone)),
@@ -61,7 +61,9 @@ View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m
 
 View::~View()
 {
-    delete m_plant;
+    delete[] m_plant;
+    glDeleteTextures(1, &m_plant_tex_id);
+    glDeleteTextures(1, &m_bump_map_id);
 }
 
 void View::initializeGL()
@@ -89,7 +91,7 @@ void View::initializeGL()
     m_plantshader = ResourceLoader::loadShaders(":/shaders/plant.vert", ":/shaders/plant.frag");
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
-    m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
+    m_skybox.init(glGetAttribLocation(m_shader, "position"), "/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosY.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
     m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
     m_cone.tesselate(50,50,0);
@@ -155,7 +157,7 @@ void View::initializeGL()
     }
 
     QImage plantTex;
-    plantTex.load(QString::fromStdString("assets/plant.jpg"));
+    plantTex.load(QString::fromStdString("/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/plant.jpg"));
     plantTex = QGLWidget::convertToGLFormat(plantTex);
 
     // Generate a new OpenGL texture ID to put our image into

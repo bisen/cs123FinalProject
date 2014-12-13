@@ -18,6 +18,7 @@
 
 #include "plant.h"
 #include "ivy.h"
+#include "ivyalt.h"
 
 class View : public QGLWidget
 {

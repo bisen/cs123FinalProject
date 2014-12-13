@@ -4,6 +4,7 @@
 #include "cylinder.h"
 #include "cone.h"
 #include "ivy.h"
+#include "ivyalt.h"
 
 
 class Level

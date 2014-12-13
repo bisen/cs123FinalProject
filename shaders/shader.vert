@@ -30,11 +30,6 @@ uniform vec3 allBlack = vec3(1);
 uniform int textureWidth;
 uniform int textureHeight;
 
-//out vec3 position_worldSpace; // position of vertex in world space
-//flat out vec3 flat_normal_cameraSpace; // normal of vertex in camera space
-//out vec3 eyeDirection_cameraSpace; // vector from vertex to eye
-//out vec3 lightPosition_cameraSpace; // direction of light in camera space
-
 uniform float radius;
 uniform float size;
 uniform bool wrap = false;
@@ -53,15 +48,9 @@ vec4 transform_to_cylinder(vec3 inpos) {
 
     outpos = vec4(newx, inpos.y, newz, 1.0);
     if(inpos.y > 0.5) {
-//        vec4 flatpos = vec4(-cos(theta) * (0.5 - (0.5 * (inpos.y - 0.5))), inpos.y, -sin(theta) * (0.5 - (0.5 * (inpos.y - 0.5))), 1.0);
-//        vec4 norm = normalize(vec4(cos(theta), 1.0, sin(theta), 0.0));
-//        return (inpos.z * norm) + flatpos;
-        outpos = outpos + vec4( ((0.34) * (inpos.y - 0.5)), 0.0, ((0.34) * (inpos.y - 0.5)), 0.0);
+        outpos = outpos - vec4( ((inpos.y - 0.5) * newx), 0.0, ((inpos.y - 0.5) * newz), 0.0);
     } else if(inpos.y < -0.5) {
-//        vec4 flatpos = vec4(-cos(theta) * (0.5 + (0.5 * (inpos.y + 0.5))), inpos.y, -sin(theta) * (0.5 + (0.5 * (inpos.y + 0.5))), 1.0);
-//        vec4 norm = normalize(vec4(cos(theta), -1.0, sin(theta), 0.0));
-//        return (inpos.z * norm) + flatpos;
-        outpos = outpos - vec4( ((0.34) * (inpos.y + 0.5)), 0.0, ((0.34) * (inpos.y + 0.5)), 0.0);
+        outpos = outpos + vec4( ((inpos.y + 0.5) * newx), 0.0, ( (inpos.y + 0.5) * newz), 0.0);
     }
 
     return outpos;

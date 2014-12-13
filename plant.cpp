@@ -9,7 +9,7 @@ Plant::Plant()
 
     m_system = new LSys();
     char *ab = "ab";
-    Rule *r1 = new StochasticRule('x', "a[-x][+x][~x]", "0", 0.70f);
+    Rule *r1 = new StochasticRule('x', "a[-x][+x][~x]", "0", 0.80f);
     Rule *r2 = new Rule('a', "aa");
 
     m_system->addRule(r1);
@@ -29,6 +29,9 @@ Plant::~Plant() {
 
     if(m_initialized) {
         delete[] m_buf;
+
+        glDeleteBuffers(1, &m_vboid);
+        glDeleteVertexArrays(1, &m_vaoid);
     }
 }
 
@@ -62,7 +65,6 @@ int Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, 
             n.model = glm::translate(glm::mat4(1.0f), translation) * rotation * scale;
             translation = translation + (glm::vec3(rotation * scale * glm::vec4(0.0f, m_factor, 0.0f, 0.0f)));
             n.color = color1 + ((colordelta / (float)level) * (float)currentlevel);
-//            scale = scale * scalemat;
             m_scenegraph->append(n);
             break;
         case '+':
@@ -96,14 +98,11 @@ int Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, 
     m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
     this->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
 
+    delete[] lsys;
     return 1;
 }
 
 void Plant::render(GLuint shader, Transforms t) {
-
-//    glUniformMatrix4fv(glGetUniformLocation(shader, "v"), 1, GL_FALSE, &t.view[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(shader, "m"), 1, GL_FALSE, &t.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(shader, "mvp"), 1, GL_FALSE, &t.getTransform()[0][0]);
 
     glUniform1i(glGetUniformLocation(shader, "wrap"), 1);
     glUniform1f(glGetUniformLocation(shader, "radius"), 0.5f);
@@ -117,7 +116,6 @@ void Plant::render(GLuint shader, Transforms t) {
 
 
     glBindVertexArray(m_vaoid);
-//    printf("%s", glewGetErrorString(glGetError()));
     glDrawArrays(GL_TRIANGLES, 0, m_num_vert);
 
     glBindVertexArray(0);
@@ -135,7 +133,6 @@ void Plant::render(GLuint shader, Transforms t) {
 void Plant::copyAndMult(GLfloat *buf, int index, int index2, glm::mat4 matrix, glm::mat4 inverseMat) {
     assert(index % 11 == 0);
     glm::vec4 newVec = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f);
-//    glm::vec4 newVec2 = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 0.1f, 0.1f)) * matrix * (glm::vec4(buf[index2], buf[index2+1] + 0.5f, buf[index2+2], 1.0f) + glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
     glm::vec4 newNorm = glm::normalize(matrix * glm::vec4(buf[index2+3], buf[index2+4], buf[index2+5], 0.0f));
 
     m_buf[index] = newVec.x;

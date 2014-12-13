@@ -6,11 +6,9 @@ Level::Level(Cylinder *cylinder, Cone *cone)
 {
     m_cylinder = cylinder;
     m_cone = cone;
-    //m_ivy = new Ivy();
 }
 
 Level::~Level(){
-    //delete m_ivy;
 }
 
 void Level::init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
