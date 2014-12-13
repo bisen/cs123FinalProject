@@ -32,7 +32,7 @@ Plant::~Plant() {
     }
 }
 
-void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
+int Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
     m_factor = 1.0f / pow(1.33f, (float)level);
 
     glm::vec3 color1 = glm::vec3(0.408f, 0.259f, 0.102f); //Brown
@@ -95,6 +95,8 @@ void Plant::parseSystem(int level, GLuint vertexLocation, GLuint normalLocation,
     m_cyl->tesselate(15,15,0);
     m_cyl->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
     this->init(vertexLocation, normalLocation, tangentLocation, textureLocation);
+
+    return 1;
 }
 
 void Plant::render(GLuint shader, Transforms t) {

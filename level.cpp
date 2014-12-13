@@ -6,16 +6,15 @@ Level::Level(Cylinder *cylinder, Cone *cone)
 {
     m_cylinder = cylinder;
     m_cone = cone;
-    m_ivy = new Ivy();
+    //m_ivy = new Ivy();
 }
 
 Level::~Level(){
-    delete m_ivy;
+    //delete m_ivy;
 }
 
 void Level::init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation) {
     m_ivy->parseSystem(IVY_RECURSION, vertexLocation, normalLocation, tangentLocation, textureLocation);
-//    m_ivy->init(vertexLocation, normalLocation);
 }
 
 void Level::draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLfloat size, Transforms transform)
@@ -57,22 +56,6 @@ void Level::draw(GLuint shader, GLfloat d, GLfloat param_x, GLfloat param_y, GLf
     glFrontFace(GL_CCW);
     glUniform1i(glGetUniformLocation(shader, "isBackFace"), GL_FALSE);
     m_cone->draw();
-
-//    Transforms transformT = transform;
-//    transformT.model=glm::translate(transformT.model, glm::vec3(param_x+0.5*m_size, param_y, d-0.4));
-//    transformT.model=glm::scale(transformT.model, glm::vec3(0.3, 0.3, 0.1));
-//    glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_sphere.draw();
-
-//    transformT.model=glm::scale(transformT.model, glm::vec3(1.1, 1.1, 5));
-//    transformT.model=glm::translate(transformT.model, glm::vec3(0, 0, 0.6));
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &transformT.getTransform()[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &transformT.model[0][0]);
-//    glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &transformT.view[0][0]);
-//    m_cone.draw();
 }
 
 void Level::drawIvy(GLuint shader, Transforms t) {

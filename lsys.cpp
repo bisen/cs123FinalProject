@@ -93,7 +93,6 @@ char *LSys::generateStep(char *current, int n) {
     }
 
     delete[] current;
-    printf("%s\n", result);
     return generateStep(result, n-1);
 }
 

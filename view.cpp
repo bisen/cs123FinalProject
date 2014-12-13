@@ -3,7 +3,13 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m_cone(Cone(50,50,0)), m_level(Level(&m_cylinder, &m_cone))
+#define PLANTS 10
+
+View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m_cone(Cone(50,50,0)),
+    m_level1(Level(&m_cylinder, &m_cone)),
+        m_level2(Level(&m_cylinder, &m_cone)),
+            m_level3(Level(&m_cylinder, &m_cone)),
+                m_level4(Level(&m_cylinder, &m_cone))
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -26,7 +32,10 @@ View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m
     m_theta = 0.0f;
     m_phi = M_PI / 2.0f;
 
-//    m_plant = new Ivy();
+    m_plant = new Plant*[PLANTS];
+    for(int i = 0; i < PLANTS; i++){
+        m_plant[i] = new Ivy();
+    }
 
     m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
@@ -43,11 +52,16 @@ View::View(QWidget *parent) : QGLWidget(parent), m_cylinder(Cylinder(50,50,0)),m
     m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
     m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+
+    l1_mid = true;
+    l2_mid = true;
+    l3_mid = true;
+    l4_mid = true;
 }
 
 View::~View()
 {
-//    delete m_plant;
+    delete m_plant;
 }
 
 void View::initializeGL()
@@ -118,7 +132,7 @@ void View::initializeGL()
     //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
 
     QImage bumpMap;
-    bumpMap.load(QString::fromStdString("assets/heightmaplarger.png"));
+    bumpMap.load(QString::fromStdString("/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/heightmaplarger.png"));
     bumpMap = QGLWidget::convertToGLFormat(bumpMap);
 
     // Generate a new OpenGL texture ID to put our image into
@@ -136,7 +150,18 @@ void View::initializeGL()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    m_level.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+//    m_level1.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+//    m_level2.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+//    m_level3.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+//    m_level4.init(glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+
+    for(int i = 0; i < PLANTS; i++){
+        m_plant[i]->parseSystem(16, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
+    }
+    m_level1.setSystem(m_plant[rand() % PLANTS]);
+    m_level2.setSystem(m_plant[rand() % PLANTS]);
+    m_level3.setSystem(m_plant[rand() % PLANTS]);
+    m_level4.setSystem(m_plant[rand() % PLANTS]);
 }
 
 void View::paintGL()
@@ -193,38 +218,75 @@ void View::paintGL()
     glUseProgram(m_shader);
 
     ///////////layer 1
-    m_level.draw(m_shader, d1, m_param_x_1, m_param_y_1, m_size_1, m_transform);
+    glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_1);
+    m_level1.draw(m_shader, d1, m_param_x_1, m_param_y_1, m_size_1, m_transform);
     ///////////layer 2
-    m_level.draw(m_shader, d2, m_param_x_2, m_param_y_2, m_size_2, m_transform);
+    glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_2);
+    m_level2.draw(m_shader, d2, m_param_x_2, m_param_y_2, m_size_2, m_transform);
     ///////////layer 3
-    m_level.draw(m_shader, d3, m_param_x_3, m_param_y_3, m_size_3, m_transform);
+    glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_3);
+    m_level3.draw(m_shader, d3, m_param_x_3, m_param_y_3, m_size_3, m_transform);
     ///////////layer 4
-    m_level.draw(m_shader, d4, m_param_x_4, m_param_y_4, m_size_4, m_transform);
+    glUniform1f(glGetUniformLocation(m_shader, "size"), m_size_4);
+    m_level4.draw(m_shader, d4, m_param_x_4, m_param_y_4, m_size_4, m_transform);
 
     m_camera.eye[0] = 1.4*sin(2*m_pos_y/M_PI);
     m_camera.eye[2] = 1.4*cos(2*m_pos_y/M_PI);
+
     if (d1 >1.9) {
         m_param_x_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_1 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+        if(l1_mid) {
+            m_level1.setSystem(m_plant[rand() % PLANTS]);
+            l1_mid = false;
+        }
+    }
+
+    if(d1 > 0.9 && d1 < 1.0) {
+        l1_mid = true;
     }
 
     if (d2 >1.9) {
         m_param_x_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_2 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+        if(l2_mid) {
+            m_level2.setSystem(m_plant[rand() % PLANTS]);
+            l2_mid = false;
+        }
+    }
+
+    if(d2 > 0.9 && d2 < 1.0) {
+        l2_mid = true;
     }
 
     if (d3 >1.9) {
         m_param_x_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_3 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+        if(l3_mid) {
+            m_level3.setSystem(m_plant[rand() % PLANTS]);
+            l3_mid = false;
+        }
+    }
+
+    if(d3 > 0.9 && d3 < 1.0) {
+        l3_mid = true;
     }
 
     if (d4 >1.9) {
         m_param_x_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_param_y_4 = static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
+        if(l4_mid) {
+            m_level4.setSystem(m_plant[rand() % PLANTS]);
+            l4_mid = false;
+        }
+    }
+
+    if(d4 > 0.9 && d4 < 1.0) {
+        l4_mid = true;
     }
 
     m_theta+=(m_dir_theta/(float) 60);

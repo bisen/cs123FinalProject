@@ -51,7 +51,10 @@ private:
 
     Cylinder m_cylinder;
     Cone m_cone;
-    Level m_level;
+    Level m_level1;
+    Level m_level2;
+    Level m_level3;
+    Level m_level4;
 
     float m_fps;
     float m_increment;
@@ -80,12 +83,19 @@ private:
 
     Cylinder *c;
 
-    Plant *m_plant;
+    Plant **m_plant;
 
     GLuint m_plantshader;
     GLuint m_bump_map_id;
 
     float m_theta, m_phi;
+
+    bool l1_mid;
+    bool l2_mid;
+    bool l3_mid;
+    bool l4_mid;
+
+    int m_ivy_index;
 
 private slots:
     void tick();

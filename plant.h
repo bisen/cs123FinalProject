@@ -22,7 +22,7 @@ public:
     virtual ~Plant();
 
     void render(GLuint shader, Transforms t);
-    virtual void parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
+    virtual int parseSystem(int level, GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
     void init(GLuint vertexLocation, GLuint normalLocation, GLuint tangentLocation, GLuint textureLocation);
 
     static void printVertex(glm::vec4 v) { printf("%f, %f, %f\n", v.x, v.y, v.z); }
