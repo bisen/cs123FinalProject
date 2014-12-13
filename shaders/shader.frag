@@ -37,9 +37,9 @@ void main(){
             vec3 pv = cross(vec3(normal_cameraSpace),pu);
             float eu = 1.0/textureWidth;
             float ev = 1.0/textureHeight;
-            float fu = (texture(tex,vec2(texc.x+eu,texc.y)).x - texture(tex,vec2(texc.x-eu,texc.y)).x)/(2*eu);
-            float fv = (texture(tex,vec2(texc.x,texc.y+ev)).x - texture(tex,vec2(texc.x,texc.y-ev)).x)/(2*ev);
-            normal = vec4(normalize(vec3(normal) + (fu * pu) - (fv * pv)),0);
+            float fu = (texture(tex,vec2(texc.x+eu,texc.y)).x - texture(tex,vec2(texc.x-eu,texc.y)).x)/(50*eu);
+            float fv = (texture(tex,vec2(texc.x,texc.y+ev)).x - texture(tex,vec2(texc.x,texc.y-ev)).x)/(50*ev);
+            //normal = vec4(normalize(vec3(normal) + (fu * pu) - (fv * pv)),0);
         }
 
         vec3 color = ambient_color;
@@ -59,7 +59,7 @@ void main(){
             float intensity = 0;
             intensity += max(0.0, dot(lightDir, normal));
             if(intensity > 0.95) {
-                color += diffuse_color;
+                color += (0.75) * diffuse_color;
             } else if(intensity > 0.8) {
                 color += (0.5) * diffuse_color;
             } else if(intensity > 0.4) {
@@ -82,7 +82,7 @@ void main(){
         */
 
         fragColor = vec4(color.xyz,1);
-        if(useTexture == 1)
-            fragColor = vec4(clamp(color*0.8 + 0.1*texColor, vec3(0),vec3(1)), 1);
+        //if(useTexture == 1)
+            //fragColor = vec4(clamp(color*0.95 + 0.05*texColor, vec3(0),vec3(1)), 1);
     }
 }
