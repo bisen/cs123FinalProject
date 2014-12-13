@@ -35,29 +35,44 @@ uniform int textureHeight;
 //out vec3 lightPosition_cameraSpace; // direction of light in camera space
 
 uniform float radius;
-uniform vec3 center;
+uniform float size;
 uniform bool wrap = false;
+
+vec4 transform_to_cylinder(vec3 inpos) {
+
+    float circumference = 2 * M_PI * radius;
+    float u = inpos.x / circumference;
+    float theta = u * 2 * M_PI;
+
+    vec4 outpos = vec4(0.0);
+    float r = -radius + position.z;
+
+    float newx = r * cos(theta);
+    float newz = r * sin(theta);
+
+    outpos = vec4(newx, inpos.y, newz, 1.0);
+    if(inpos.y > 0.5) {
+//        vec4 flatpos = vec4(-cos(theta) * (0.5 - (0.5 * (inpos.y - 0.5))), inpos.y, -sin(theta) * (0.5 - (0.5 * (inpos.y - 0.5))), 1.0);
+//        vec4 norm = normalize(vec4(cos(theta), 1.0, sin(theta), 0.0));
+//        return (inpos.z * norm) + flatpos;
+        outpos = outpos + vec4( ((0.34) * (inpos.y - 0.5)), 0.0, ((0.34) * (inpos.y - 0.5)), 0.0);
+    } else if(inpos.y < -0.5) {
+//        vec4 flatpos = vec4(-cos(theta) * (0.5 + (0.5 * (inpos.y + 0.5))), inpos.y, -sin(theta) * (0.5 + (0.5 * (inpos.y + 0.5))), 1.0);
+//        vec4 norm = normalize(vec4(cos(theta), -1.0, sin(theta), 0.0));
+//        return (inpos.z * norm) + flatpos;
+        outpos = outpos - vec4( ((0.34) * (inpos.y + 0.5)), 0.0, ((0.34) * (inpos.y + 0.5)), 0.0);
+    }
+
+    return outpos;
+}
 
 void main(){
 
     if(wrap) {
         texc = texCoord;
 
-        float circumference = 2 * M_PI * radius;
-
-        vec3 position2 = position + normal;
-
-        float u = position.x / circumference;
-        float theta = u * 2 * M_PI;
-        float theta2 = (position2.x / circumference) * 2 * M_PI;
-        float r = -radius + position.z;
-        float r2 = -radius + position2.z;
-
-        float newx = r * cos(theta);
-        float newz = r * sin(theta);
-
-        vec4 cyl_position = vec4(newx, position.y, newz, 1.0);
-        vec4 cyl_position2 = vec4(r2 * cos(theta2), position2.y, r2 * sin(theta), 1.0);
+        vec4 cyl_position = transform_to_cylinder(position);
+        vec4 cyl_position2 = transform_to_cylinder(position + normal);
         vec4 cyl_normal = cyl_position2 - cyl_position;
 
         normal_objectSpace = normalize(vec4(cyl_normal.xyz, 1.0));
