@@ -81,12 +81,8 @@ private:
     GLfloat m_dir_y = 1.0;
     GLfloat m_pos_y;
 
-
-    Cylinder *c;
-
     Plant **m_plant;
 
-    GLuint m_plantshader;
     GLuint m_bump_map_id;
     GLuint m_plant_tex_id;
 

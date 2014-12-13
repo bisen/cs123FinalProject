@@ -88,10 +88,9 @@ void View::initializeGL()
     fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
     m_skyboxShader = ResourceLoader::loadShaders(":/shaders/skybox.vert", ":/shaders/skybox.frag");
-    m_plantshader = ResourceLoader::loadShaders(":/shaders/plant.vert", ":/shaders/plant.frag");
     m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
-    m_skybox.init(glGetAttribLocation(m_shader, "position"), "/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegX.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegZ.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/PosY.png","/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/NegY.png");
+    m_skybox.init(glGetAttribLocation(m_shader, "position"), "assets/PosX.png","assets/NegX.png","assets/PosZ.png","assets/NegZ.png","assets/PosY.png","assets/NegY.png");
     m_cylinder.tesselate(50,50,0);
     m_cylinder.init(glGetAttribLocation(m_shader, "position"),glGetAttribLocation(m_shader, "normal"),glGetAttribLocation(m_shader, "tangent"),glGetAttribLocation(m_shader, "texCoord"));
     m_cone.tesselate(50,50,0);
@@ -131,10 +130,8 @@ void View::initializeGL()
     // secondary monitor.2D
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
-    //m_plant->parseSystem(15, glGetAttribLocation(m_shader, "position"), glGetAttribLocation(m_shader, "normal"), glGetAttribLocation(m_shader, "tangent"), glGetAttribLocation(m_shader, "texCoord"));
-
     QImage bumpMap;
-    bumpMap.load(QString::fromStdString("/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/heightmaplarger.png"));
+    bumpMap.load(QString::fromStdString("assets/heightmaplarger.png"));
     bumpMap = QGLWidget::convertToGLFormat(bumpMap);
 
     // Generate a new OpenGL texture ID to put our image into
@@ -157,7 +154,7 @@ void View::initializeGL()
     }
 
     QImage plantTex;
-    plantTex.load(QString::fromStdString("/gpfs/main/home/crotger/course/cs123/cs123FinalProject/assets/plant.jpg"));
+    plantTex.load(QString::fromStdString("assets/plant.jpg"));
     plantTex = QGLWidget::convertToGLFormat(plantTex);
 
     // Generate a new OpenGL texture ID to put our image into
@@ -179,6 +176,10 @@ void View::initializeGL()
     m_level2.setSystem(m_plant[rand() % PLANTS]);
     m_level3.setSystem(m_plant[rand() % PLANTS]);
     m_level4.setSystem(m_plant[rand() % PLANTS]);
+    m_level1.setColor(glm::vec3(0.4,0.4,0.4));
+    m_level2.setColor(glm::vec3(0.4,0.4,0.4));
+    m_level3.setColor(glm::vec3(0.4,0.4,0.4));
+    m_level4.setColor(glm::vec3(0.4,0.4,0.4));
 }
 
 void View::paintGL()
@@ -202,7 +203,6 @@ void View::paintGL()
 
     glUseProgram(m_shader);
     glUniform1i(glGetUniformLocation(m_shader, "useLighting"), GL_TRUE);
-    //glUniform3f(glGetUniformLocation(m_shader, "ambient_color"), 0.0, 0.0, 0.0);
     glUniform3f(glGetUniformLocation(m_shader, "lightPosition_worldSpace"), -30.0, 10.0, -30.0);
     glUniform1i(glGetUniformLocation(m_shader, "smoothShading"), GL_TRUE);
     glUniform1i(glGetUniformLocation(m_shader, "tex"), 1);
@@ -233,6 +233,7 @@ void View::paintGL()
         m_size_1 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         if(l1_mid) {
             m_level1.setSystem(m_plant[rand() % PLANTS]);
+            m_level1.setColor(glm::vec3(0.2,0.2,0.2) + glm::vec3((rand() % 4)*0.1));
             l1_mid = false;
         }
     }
@@ -247,6 +248,7 @@ void View::paintGL()
         m_size_2 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         if(l2_mid) {
             m_level2.setSystem(m_plant[rand() % PLANTS]);
+            m_level2.setColor(glm::vec3(0.2,0.2,0.2) + glm::vec3((rand() % 4)*0.1));
             l2_mid = false;
         }
     }
@@ -261,6 +263,7 @@ void View::paintGL()
         m_size_3 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         if(l3_mid) {
             m_level3.setSystem(m_plant[rand() % PLANTS]);
+            m_level3.setColor(glm::vec3(0.2,0.2,0.2) + glm::vec3((rand() % 4)*0.1));
             l3_mid = false;
         }
     }
@@ -275,6 +278,7 @@ void View::paintGL()
         m_size_4 = 0.7 + static_cast <float> (rand()/6) / (static_cast <float> (RAND_MAX));
         if(l4_mid) {
             m_level4.setSystem(m_plant[rand() % PLANTS]);
+            m_level4.setColor(glm::vec3(0.2,0.2,0.2) + glm::vec3((rand() % 4)*0.1));
             l4_mid = false;
         }
     }
@@ -328,22 +332,17 @@ void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
-    // TODO: Handle keyboard presses here
     switch(event->key()) {
     case Qt::Key_Up:
-        //m_phi += -M_PI / 24;
         m_dir_y = max(min(m_dir_y+1,1.5f),-1.5f);
         break;
     case Qt::Key_Down:
-        //m_phi += M_PI / 24;
         m_dir_y = max(min(m_dir_y-1,1.5f),-1.5f);
         break;
     case Qt::Key_Left:
-        //m_theta += -M_PI / 24;
         m_dir_theta = max(min(m_dir_theta-1,3.0f),-3.0f);
         break;
     case Qt::Key_Right:
-        //m_theta += M_PI / 24;
         m_dir_theta = max(min(m_dir_theta+1,3.0f),-3.0f);
         break;
     case Qt::Key_Z:
@@ -371,8 +370,6 @@ void View::keyPressEvent(QKeyEvent *event)
         }
         break;
     }
-
-    //m_camera.eye = 5.0f * glm::vec3(glm::cos(m_theta) * glm::sin(m_phi), glm::cos(m_phi), glm::sin(m_theta) * glm::sin(m_phi));
 }
 
 void View::keyReleaseEvent(QKeyEvent *event)
@@ -381,12 +378,6 @@ void View::keyReleaseEvent(QKeyEvent *event)
 
 void View::tick()
 {
-    // Get the number of seconds since the last tick (variable update rate)
-    float seconds = time.restart() * 0.001f;
-
-    // TODO: Implement the demo update here
-
-    // Flag this view for repainting (Qt will call paintGL() soon after)
     update();
 }
 
