@@ -86,6 +86,9 @@ private:
     GLuint m_bump_map_id;
 
     float m_theta, m_phi;
+    bool m_use_cel_shading = true;
+    bool m_blend_texture = true;
+    bool m_use_bump_mapping = true;
 
 private slots:
     void tick();
